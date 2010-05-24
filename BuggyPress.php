@@ -5,7 +5,7 @@ Plugin URI: http://www.adeliedesign.com/
 Description: A bug-tracking/issue-tracking/case-management system.
 Author: Adelie Design
 Author URI: http://www.adeliedesign.com/
-Version: 0.1
+Version: 0.1.1
 */
 /*
 Copyright (c) 2010 Adelie Design, Inc. http://www.AdelieDesign.com/
