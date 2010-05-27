@@ -5,7 +5,7 @@ Plugin URI: http://www.adeliedesign.com/
 Description: A bug-tracking/issue-tracking/case-management system.
 Author: Adelie Design
 Author URI: http://www.adeliedesign.com/
-Version: 0.1.1
+Version: 0.1.2
 */
 /*
 Copyright (c) 2010 Adelie Design, Inc. http://www.AdelieDesign.com/
@@ -176,7 +176,7 @@ class BuggyPress {
   
   public function comment_form_defaults( $defaults = array() ) {
     global $post;
-    if ( $post->post_type = 'issue' && current_user_can('edit_issues') ) {
+    if ( $post->post_type == 'issue' && current_user_can('edit_issues') ) {
       $update_fields = '<div class="issue-update">';
       $update_fields .= $this->taxonomy_select_box($post->ID, 'issue_type', 'Type');
       $update_fields .= $this->taxonomy_select_box($post->ID, 'issue_priority', 'Priority');
