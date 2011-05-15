@@ -2,15 +2,13 @@
 Contributors: jbrinley
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=A69NZPKWGB6H2
 Tags: bug-tracking, issue-tracking, case-management
-Requires at least: 3.0
-Tested up to: 3.0
-Stable tag: 0.1.2
+Requires at least: 3.1
+Tested up to: 3.1
+Stable tag: 0.2
 
 A simple bug-tracking/issue-tracking/case-management system.
 
 == Description ==
-
-Note: This plugin requires WordPress version 3.0, which has not yet been officially released. I will make every effort to keep the plugin up-to-date with the latest changes, but bugs may arise during the dynamic pre-release period. 
 
 A simple bug-tracking/issue-tracking/case-management system.
 
@@ -58,3 +56,6 @@ Contact [Adelie Design](http://www.AdelieDesign.com) at [http://www.AdelieDesign
 
 = 0.1 =
 *Initial version
+
+= 0.2 =
+*Complete rewrite
