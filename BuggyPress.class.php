@@ -6,13 +6,13 @@
  */
 
 abstract class BuggyPress {
-	const TEXT_DOMAIN = 'buggypress';
-	const VERSION = '0.2';
-	const DB_VERSION = 1;
 	const PLUGIN_NAME = 'BuggyPress';
+	const TEXT_DOMAIN = 'buggypress';
 	const DEBUG = FALSE;
-	const MIN_WP_VERSION = '3.1';
 	const MIN_PHP_VERSION = '5.2';
+	const MIN_WP_VERSION = '3.1';
+	const VERSION = '0.3';
+	const DB_VERSION = 1;
 
 
 	/**
@@ -21,7 +21,7 @@ abstract class BuggyPress {
 	 * @param string $string
 	 * @return string|void
 	 */
-	final public static function __( $string ) {
+	public static function __( $string ) {
 		return __($string, self::TEXT_DOMAIN);
 	}
 
@@ -31,7 +31,7 @@ abstract class BuggyPress {
 	 * @param string $string
 	 * @return void
 	 */
-	final public static function _e( $string ) {
+	public static function _e( $string ) {
 		return _e($string, self::TEXT_DOMAIN);
 	}
 
@@ -40,7 +40,7 @@ abstract class BuggyPress {
 	 * @static
 	 * @return string The system path to this plugin's directory, with no trailing slash
 	 */
-	final public static function plugin_path() {
+	public static function plugin_path() {
 		return WP_PLUGIN_DIR . '/' . basename( dirname( __FILE__ ) );
 	}
 
@@ -48,7 +48,26 @@ abstract class BuggyPress {
 	 * @static
 	 * @return string The url to this plugin's directory, with no trailing slash
 	 */
-	final public static function plugin_url() {
+	public static function plugin_url() {
 		return WP_PLUGIN_URL . '/' . basename( dirname( __FILE__ ) );
+	}
+
+	/**
+	 * Check that the minimum PHP and WP versions are met
+	 * 
+	 * @static
+	 * @param string $php_version
+	 * @param string $wp_version
+	 * @return bool Whether the test passed
+	 */
+	public static function prerequisites_met( $php_version, $wp_version ) {
+		$pass = TRUE;
+		$pass = $pass && version_compare( $php_version, self::MIN_PHP_VERSION, '>=');
+		$pass = $pass && version_compare( $wp_version, self::MIN_WP_VERSION, '>=');
+		return $pass;
+	}
+
+	public static function failed_to_load_notices( $php_version = self::MIN_PHP_VERSION, $wp_version = self::MIN_WP_VERSION ) {
+		printf( '<div class="error"><p>%s</p></div>', sprintf( self::__( 'BuggyPress requires WordPress %1$s or higher and PHP %2$s or higher.' ), $wp_version, $php_version ) );
 	}
 }

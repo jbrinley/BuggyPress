@@ -66,6 +66,30 @@ class BuggyPressTest extends PHPUnit_Extensions_OutputTestCase {
 	public function testPlugin_url( ) {
 		$this->assertEquals('http://example.org/wp-content/plugins/BuggyPress', BuggyPress::plugin_url());
 	}
+
+
+	public function version_provider() {
+		return array(
+			array('4.3', '2.5', FALSE),
+			array('5.2', '3.0', FALSE),
+			array('5.2', '3.1', TRUE),
+			array('5.2.18', '3.1.2', TRUE),
+			array('5.3', '3.1.1', TRUE),
+			array('5.1', '3.1', FALSE),
+		);
+	}
+
+	/**
+	 * @dataProvider version_provider
+	 */
+	public function testPrerequisites_met( $php, $wp, $result ) {
+		$this->assertEquals($result, BuggyPress::prerequisites_met($php, $wp));
+	}
+
+	public function testFailed_to_load_notices() {
+		$this->expectOutputString('<div class="error"><p>BuggyPress requires WordPress 3.1 or higher and PHP 5.2 or higher.</p></div>');
+		BuggyPress::failed_to_load_notices('5.2', '3.1');
+	}
 }
 
 ?>

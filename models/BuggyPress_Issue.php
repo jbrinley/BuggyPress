@@ -5,6 +5,6 @@
  * Time: 4:58 PM
  */
  
-class BuggyPress_Issue extends BuggyPress_Model {
+class BuggyPress_Issue extends BuggyPress_Post_Type {
 
 }
