@@ -42,8 +42,13 @@ function BuggyPress_load() {
 		require_once 'BuggyPress.class.php';
 
 		if ( BuggyPress::prerequisites_met(phpversion(), get_bloginfo('version')) ) {
+			// we can continue. Load all supporting files and hook into wordpress
 			require_once 'BuggyPress_File_Loader.php';
-			new BuggyPress_File_Loader();
+			$loader = new BuggyPress_File_Loader();
+			$loader->load();
+			$loader->initialize();
+			$loader->__destruct();
+			unset($loader);
 		} else {
 			// let the user know prerequisites weren't met
 			add_action('admin_head', array('BuggyPress', 'failed_to_load_notices'), 0, 0);

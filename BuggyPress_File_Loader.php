@@ -17,12 +17,21 @@ class BuggyPress_File_Loader {
 
 		// autoload BuggyPress classes in designated directories (so file load order doesn't matter)
 		spl_autoload_register(array($this, 'autoloader'));
+	}
 
-		// include all models and controllers
-		$this->load_plugin_files();
-
-		// unregister so we can be garbage collected
+	public function __destruct() {
 		spl_autoload_unregister(array($this, 'autoloader'));
+	}
+
+	/**
+	 * Load the plugin's files
+	 *
+	 * @return void
+	 */
+	public function load() {
+		foreach ( $this->dirs as $dir ) {
+			$this->recursively_include(BuggyPress::plugin_path().'/'.$dir);
+		}
 	}
 
 	/**
@@ -41,14 +50,50 @@ class BuggyPress_File_Loader {
 	}
 
 	/**
-	 * Load the plugin's files
-	 *
+	 * Calls the static init() function on the given classes
+	 * 
+	 * @param array $classes
 	 * @return void
 	 */
-	private function load_plugin_files() {
-		foreach ( $this->dirs as $dir ) {
-			$this->recursively_include(BuggyPress::plugin_path().'/'.$dir);
+	public function initialize( array $classes = array() ) {
+		// TODO: Check if this needs to be optimized
+		if ( !$classes ) {
+			$classes = $this->get_buggypress_classes();
 		}
+		foreach ( $classes as $class_name ) {
+			if ( $this->implements_init($class_name) ) {
+				add_action('init', array($class_name, 'init'), 10, 0);
+			}
+		}
+	}
+
+	/**
+	 * @return array A list of declared classes that are subclasses of BuggyPress
+	 */
+	private function get_buggypress_classes() {
+		$our_classes = array();
+		$all_classes = get_declared_classes();
+		foreach ( $all_classes as $class ) {
+			if ( $class == 'BuggyPress' || is_subclass_of($class, 'BuggyPress') ) {
+				$our_classes[] = $class;
+			}
+		}
+		return $our_classes;
+	}
+
+	/**
+	 * @param string $class_name
+	 * @return bool Whether the class implements the static 'init' method
+	 */
+	private function implements_init( $class_name ) {
+		$reflection = new ReflectionClass($class_name);
+		if ( $reflection->hasMethod('init') ) {
+			$method = $reflection->getMethod('init');
+			if ( $method->isStatic() && $method->getDeclaringClass()->getName() == $class_name ) {
+				return TRUE;
+			}
+		}
+		return FALSE;
 	}
 
 	/**
