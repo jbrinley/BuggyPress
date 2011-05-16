@@ -27,6 +27,7 @@ class BuggyPressTest extends PHPUnit_Extensions_OutputTestCase {
 	 * This method is called after a test is executed.
 	 */
 	protected function tearDown( ) {
+		_reset_wp();
 	}
 
 	public function string_provider() {
@@ -89,6 +90,38 @@ class BuggyPressTest extends PHPUnit_Extensions_OutputTestCase {
 	public function testFailed_to_load_notices() {
 		$this->expectOutputString('<div class="error"><p>BuggyPress requires WordPress 3.1 or higher and PHP 5.2 or higher.</p></div>');
 		BuggyPress::failed_to_load_notices('5.2', '3.1');
+	}
+
+	/**
+	 * @dataProvider action_provider
+	 */
+	public function testAdd_action($name, $callback, $priority, $accepted_args) {
+		BuggyPress::add_action($name, $callback, $priority, $accepted_args);
+		global $wp_test_expectations;
+		$this->assertArrayHasKey($name, $wp_test_expectations['actions']);
+
+		// not an exact mirror of real WP, but works for our test suite
+		$this->assertEquals($callback, $wp_test_expectations['actions'][$name]);
+	}
+
+	/**
+	 * @dataProvider action_provider
+	 */
+	public function testAdd_filter($name, $callback, $priority, $accepted_args) {
+		BuggyPress::add_filter($name, $callback, $priority, $accepted_args);
+		global $wp_test_expectations;
+		$this->assertArrayHasKey($name, $wp_test_expectations['filters']);
+		$this->assertArrayHasKey($priority, $wp_test_expectations['filters'][$name]);
+		$this->assertContains($callback, $wp_test_expectations['filters'][$name][$priority]);
+	}
+
+	public function action_provider() {
+		return array(
+			array('init', 'initialize', 10, 0),
+			array('init', array('BuggyPress', 'initialize'), 10, 0),
+			array('init', array($this, 'initialize'), 10, 0),
+			array('wp', 'handle_callbacks', 0, 1),
+		);
 	}
 }
 

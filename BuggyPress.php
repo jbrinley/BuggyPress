@@ -49,6 +49,8 @@ function BuggyPress_load() {
 			$loader->initialize();
 			$loader->__destruct();
 			unset($loader);
+
+			BuggyPress::add_action('init', array('BuggyPress', 'initialized'), -100, 0);
 		} else {
 			// let the user know prerequisites weren't met
 			add_action('admin_head', array('BuggyPress', 'failed_to_load_notices'), 0, 0);

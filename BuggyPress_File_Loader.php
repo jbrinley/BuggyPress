@@ -56,13 +56,13 @@ class BuggyPress_File_Loader {
 	 * @return void
 	 */
 	public function initialize( array $classes = array() ) {
-		// TODO: Check if this needs to be optimized
+		// TODO: optimize?
 		if ( !$classes ) {
 			$classes = $this->get_buggypress_classes();
 		}
 		foreach ( $classes as $class_name ) {
 			if ( $this->implements_init($class_name) ) {
-				add_action('init', array($class_name, 'init'), 10, 0);
+				BuggyPress::add_action(BuggyPress::PLUGIN_INIT_HOOK, array($class_name, 'init'), 10, 0);
 			}
 		}
 	}
