@@ -5,7 +5,7 @@ Plugin URI: http://www.adeliedesign.com/
 Description: A bug-tracking/issue-tracking/case-management system.
 Author: Adelie Design
 Author URI: http://www.adeliedesign.com/
-Version: 0.1.2
+Version: 0.2
 */
 /*
 Copyright (c) 2010 Adelie Design, Inc. http://www.AdelieDesign.com/
@@ -29,7 +29,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-  
+
 
 //register_activation_hook(__FILE__, array(&$buggy_press->config, 'activate'));
 //register_deactivation_hook(__FILE__, array(&$buggy_press->config, 'deactivate'));
