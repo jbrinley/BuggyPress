@@ -42,55 +42,11 @@ function BuggyPress_load() {
 		require_once 'BuggyPress.class.php';
 
 		if ( BuggyPress::prerequisites_met(phpversion(), get_bloginfo('version')) ) {
-			// autoload BuggyPress classes in designated directories
-			spl_autoload_register('BuggyPress_autoload');
-
-			// include all models and controllers
-			BuggyPress_include(BuggyPress::plugin_path().'/models');
-			BuggyPress_include(BuggyPress::plugin_path().'/controllers');
+			require_once 'BuggyPress_File_Loader.php';
+			new BuggyPress_File_Loader();
 		} else {
-
 			// let the user know prerequisites weren't met
 			add_action('admin_head', array('BuggyPress', 'failed_to_load_notices'), 0, 0);
-		}
-	}
-}
-
-/**
- * Recursively load all *.php files in the given directory and its sub-directories
- *
- * @param string $dir
- * @return bool
- */
-function BuggyPress_include( $dir ) {
-	if ( !is_dir($dir) ) {
-		return FALSE;
-	}
-	$dirHandle = opendir($dir);
-	while ( FALSE !== ( $incFile = readdir($dirHandle) ) ) {
-		if ( substr($incFile, -4) == '.php' ) {
-			if ( is_file("$dir/$incFile") ) {
-				include_once("$dir/$incFile");
-			} else {
-				BuggyPress_include("$dir/$incFile");
-			}
-		}
-	}
-	return TRUE;
-}
-
-/**
- * Check this plugin's directories for classes to autoload
- *
- * @param string $name
- * @return void
- */
-function BuggyPress_autoload( $name ) {
-	$dirs = array('models', 'controllers');
-	foreach ( $dirs as $dir ) {
-		if ( is_file(BuggyPress::plugin_path().'/'.$dir.'/'.$name.'.php') ) {
-			include_once(BuggyPress::plugin_path().'/'.$dir.'/'.$name.'.php');
-			break;
 		}
 	}
 }
