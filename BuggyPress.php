@@ -39,22 +39,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 function BuggyPress_load() {
 	if ( !class_exists('BuggyPress') ) {
 		// load the base class
-		require_once 'BuggyPress.class.php';
+		require_once 'BuggyPress_Plugin.php';
 
-		if ( BuggyPress::prerequisites_met(phpversion(), get_bloginfo('version')) ) {
-			// we can continue. Load all supporting files and hook into wordpress
-			require_once 'BuggyPress_File_Loader.php';
-			$loader = new BuggyPress_File_Loader();
-			$loader->load();
-			$loader->initialize();
-			$loader->__destruct();
-			unset($loader);
-
-			BuggyPress::add_action('init', array('BuggyPress', 'initialized'), -100, 0);
-		} else {
+		if ( !BuggyPress_Plugin::prerequisites_met(phpversion(), get_bloginfo('version')) ) {
 			// let the user know prerequisites weren't met
-			add_action('admin_head', array('BuggyPress', 'failed_to_load_notices'), 0, 0);
+			add_action('admin_head', array('BuggyPress_Plugin', 'failed_to_load_notices'), 0, 0);
+			return;
 		}
+
+		add_action('plugins_loaded', array('BuggyPress_Plugin', 'initialize_plugin'), -100, 0);
 	}
 }
 
