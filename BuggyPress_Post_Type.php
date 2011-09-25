@@ -35,6 +35,15 @@ abstract class BuggyPress_Post_Type extends BuggyPress_Plugin {
 	}
 
 	/**
+	 * An array of BuggyPress_Meta_Box
+	 * Contains the meta boxes to be displayed for the post type
+	 * Key should be the classname, value should be the BuggyPress_Meta_Box object
+	 *
+	 * @var BuggyPress_Meta_Box[]
+	 */
+	protected $meta_boxes = array();
+
+	/**
 	 * Hello. What's your name?
 	 * @var string
 	 */
@@ -178,6 +187,72 @@ abstract class BuggyPress_Post_Type extends BuggyPress_Plugin {
 		}
 	}
 
+
+
+	/**
+	 * Register a meta box for this post type
+	 *
+	 * @param string $class_name
+	 * @param array $args
+	 * @return void
+	 */
+	public function add_meta_box( $class_name, $args = array() ) {
+		if ( class_exists($class_name) ) {
+			$this->meta_boxes[$class_name] = new $class_name(get_class($this).'-'.$class_name, $args);
+		}
+	}
+
+	/**
+	 * @param string $class
+	 * @return bool Whether the post type has a meta box with the given class
+	 */
+	public function has_meta_box( $class ) {
+		return isset($this->meta_boxes[$class]);
+	}
+
+	/**
+	 * Remove a registered meta box from this post type
+	 *
+	 * @param string $class_name
+	 * @return void
+	 */
+	public function remove_meta_box( $class_name ) {
+		if ( isset($this->meta_boxes[$class_name]) ) {
+			unset($this->meta_boxes[$class_name]);
+		}
+	}
+
+	/**
+	 * @param string $class_name The class name of a particular
+	 *        meta box to return. All boxes returned as an array
+	 *        if not given
+	 * @return array|null An array of Loyalty_Activity_Meta_Box, or NULL
+	 *         if $class_name given and that class isn't registered
+	 */
+	public function get_meta_boxes( $class_name = '' ) {
+		if ( $class_name ) {
+			if ( isset($this->meta_boxes[$class_name]) ) {
+				return $this->meta_boxes[$class_name];
+			} else {
+				return NULL;
+			}
+		}
+		return $this->meta_boxes;
+	}
+
+	/**
+	 * Register all the meta boxes for this post type
+	 * Called on init action
+	 *
+	 * @return void
+	 */
+	public function register_meta_boxes() {
+		foreach ( $this->meta_boxes as $meta_box ) {
+			/** @var $meta_box Loyalty_Activity_Meta_Box */
+			add_meta_box($meta_box->get_id(), $meta_box->get_title(), array($meta_box, 'render'), $this->post_type, $meta_box->get_context(), $meta_box->get_priority(), $meta_box->get_callback_args());
+		}
+	}
+
 	/**
 	 * Save the meta boxes for this post type
 	 *
@@ -192,7 +267,10 @@ abstract class BuggyPress_Post_Type extends BuggyPress_Plugin {
 		global $wp_filter;
 		$current = key($wp_filter['save_post']);
 
-
+		foreach ( $this->meta_boxes as $meta_box ) {
+			/** @var $meta_box Loyalty_Activity_Meta_Box */
+			$meta_box->save($post_id, $post);
+		}
 
 		/*
 		 * if any of the meta boxes creates/updates a different

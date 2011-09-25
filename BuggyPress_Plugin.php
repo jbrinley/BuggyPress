@@ -86,15 +86,28 @@ class BuggyPress_Plugin {
 	}
 
 	public static function initialize_plugin() {
+		spl_autoload_register(array(__CLASS__, 'autoloader'));
 		$post_types = array(
 			'BuggyPress_Project',
 			'BuggyPress_Issue',
 		);
-		require_once(self::plugin_path('BuggyPress_Post_Type.php'));
 		foreach ( $post_types as $pt ) {
-			require_once(self::plugin_path('post_types'.DIRECTORY_SEPARATOR.$pt.'.php'));
 			add_action(self::PLUGIN_INIT_HOOK, array($pt, 'init'));
 		}
 		do_action(self::PLUGIN_INIT_HOOK);
+	}
+
+	public static function autoloader( $class ) {
+		$files = array(
+			self::plugin_path($class.'.php'),
+			self::plugin_path('post_types'.DIRECTORY_SEPARATOR.$class.'.php'),
+			self::plugin_path('meta_boxes'.DIRECTORY_SEPARATOR.$class.'.php'),
+		);
+		foreach ( $files as $file ) {
+			if ( file_exists($file) ) {
+				include_once($file);
+				break;
+			}
+		}
 	}
 }

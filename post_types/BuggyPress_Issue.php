@@ -1,9 +1,4 @@
 <?php
-/**
- * User: jbrinley
- * Date: 5/15/11
- * Time: 4:58 PM
- */
  
 class BuggyPress_Issue extends BuggyPress_Post_Type {
 	protected $post_type_label_singular = 'Issue';
@@ -27,12 +22,18 @@ class BuggyPress_Issue extends BuggyPress_Post_Type {
 	/**
 	 * Get (and instantiate, if necessary) the instance of the class
 	 * @static
-	 * @return Loyalty_Activity_Subtype_Bonus_Code
+	 * @return BuggyPress_Issue
 	 */
 	public static function get_instance() {
 		if ( !is_a(self::$instance, __CLASS__) ) {
 			self::$instance = new self();
 		}
 		return self::$instance;
+	}
+
+	protected function __construct() {
+		parent::__construct();
+		$this->add_meta_box('BuggyPress_MB_Issue_Project');
+		$this->add_meta_box('BuggyPress_MB_Assignee');
 	}
 }

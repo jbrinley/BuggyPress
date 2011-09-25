@@ -1,9 +1,4 @@
 <?php
-/**
- * User: jbrinley
- * Date: 5/15/11
- * Time: 4:58 PM
- */
  
 class BuggyPress_Project extends BuggyPress_Post_Type {
 	protected $post_type_label_singular = 'Project';
@@ -27,7 +22,7 @@ class BuggyPress_Project extends BuggyPress_Post_Type {
 	/**
 	 * Get (and instantiate, if necessary) the instance of the class
 	 * @static
-	 * @return Loyalty_Activity_Subtype_Bonus_Code
+	 * @return BuggyPress_Project
 	 */
 	public static function get_instance() {
 		if ( !is_a(self::$instance, __CLASS__) ) {
