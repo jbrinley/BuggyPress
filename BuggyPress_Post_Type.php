@@ -44,12 +44,20 @@ abstract class BuggyPress_Post_Type extends BuggyPress_Plugin {
 	protected $meta_boxes = array();
 
 	/**
+	 * An array of BuggyPress_Taxonomy
+	 * Contains the taxonomies this post type should be registered with
+	 *
+	 * @var BuggyPress_Taxonomy[]
+	 */
+	protected $taxonomies = array();
+
+	/**
 	 * Hello. What's your name?
 	 * @var string
 	 */
 	protected $post_type_label_singular = '';
 	protected $post_type_label_plural = '';
-	protected $slug = 'activities';
+	protected $slug = '';
 
 	/**
 	 * The ID of the post type
@@ -65,7 +73,7 @@ abstract class BuggyPress_Post_Type extends BuggyPress_Plugin {
 	}
 
 	protected function add_hooks() {
-		add_action('init', array($this, 'register_post_type'), 10, 0);
+		add_action('init', array($this, 'register_post_type'), 5, 0);
 		add_action('post_submitbox_misc_actions', array($this, 'display_nonce'));
 		add_action('save_post', array($this, 'save_meta_boxes'), 10, 2);
 		add_filter('template_include', array( $this, 'select_post_template' ), 10, 1 );
@@ -79,7 +87,7 @@ abstract class BuggyPress_Post_Type extends BuggyPress_Plugin {
    * @return void
    */
 	public function register_post_type() {
-		$response = register_post_type($this->post_type, $this->post_type_args());
+		register_post_type($this->post_type, $this->post_type_args());
 	}
 
 	/**
@@ -189,6 +197,16 @@ abstract class BuggyPress_Post_Type extends BuggyPress_Plugin {
 
 
 
+	public function add_taxonomy( $class_name ) {
+		if ( class_exists($class_name) ) {
+			$this->taxonomies[$class_name] = call_user_func(array($class_name, 'get_instance'));
+			$this->taxonomies[$class_name]->add_post_type($this->post_type);
+			return $this->taxonomies[$class_name];
+		}
+		return FALSE;
+	}
+
+
 	/**
 	 * Register a meta box for this post type
 	 *
@@ -268,7 +286,6 @@ abstract class BuggyPress_Post_Type extends BuggyPress_Plugin {
 		$current = key($wp_filter['save_post']);
 
 		foreach ( $this->meta_boxes as $meta_box ) {
-			/** @var $meta_box Loyalty_Activity_Meta_Box */
 			$meta_box->save($post_id, $post);
 		}
 

@@ -102,6 +102,7 @@ class BuggyPress_Plugin {
 			self::plugin_path($class.'.php'),
 			self::plugin_path('post_types'.DIRECTORY_SEPARATOR.$class.'.php'),
 			self::plugin_path('meta_boxes'.DIRECTORY_SEPARATOR.$class.'.php'),
+			self::plugin_path('taxonomies'.DIRECTORY_SEPARATOR.$class.'.php'),
 		);
 		foreach ( $files as $file ) {
 			if ( file_exists($file) ) {
