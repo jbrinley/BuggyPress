@@ -1,9 +1,10 @@
 <?php
  
 class BuggyPress_Priority extends BuggyPress_Taxonomy {
+	const TAXONOMY_ID = 'issue_priority';
 	protected $label_singular = 'Priority';
 	protected $label_plural = 'Priorities';
-	protected $id = 'issue_priority';
+	protected $id = self::TAXONOMY_ID;
 	protected $default_terms = array(
 		'critical' => array('name' => 'Critical', 'description' => 'Must be fixed ASAP'),
 		'high' => array('name' => 'High', 'description' => 'High priority'),
@@ -46,5 +47,10 @@ class BuggyPress_Priority extends BuggyPress_Taxonomy {
 			'hierarchical' => FALSE,
 		);
 		return $args;
+	}
+
+	public static function get_terms( $post_id ) {
+		$terms = wp_get_object_terms($post_id, self::TAXONOMY_ID);
+		return $terms;
 	}
 }

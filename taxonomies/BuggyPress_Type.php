@@ -1,9 +1,10 @@
 <?php
  
 class BuggyPress_Type extends BuggyPress_Taxonomy {
+	const TAXONOMY_ID = 'issue_type';
 	protected $label_singular = 'Type';
 	protected $label_plural = 'Types';
-	protected $id = 'issue_type';
+	protected $id = self::TAXONOMY_ID;
 	protected $default_terms = array(
 		'bug' => array('name' => 'Bug', 'description' => 'A bug that needs to be fixed'),
 		'feature' => array('name' => 'Feature', 'description' => 'A new feature to add'),
@@ -45,5 +46,10 @@ class BuggyPress_Type extends BuggyPress_Taxonomy {
 			'hierarchical' => FALSE,
 		);
 		return $args;
+	}
+
+	public static function get_terms( $post_id ) {
+		$terms = wp_get_object_terms($post_id, self::TAXONOMY_ID);
+		return $terms;
 	}
 }

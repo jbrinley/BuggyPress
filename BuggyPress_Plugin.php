@@ -94,6 +94,11 @@ class BuggyPress_Plugin {
 		foreach ( $post_types as $pt ) {
 			add_action(self::PLUGIN_INIT_HOOK, array($pt, 'init'));
 		}
+
+		// load all the template tags
+		foreach ( glob(self::plugin_path("/template-tags/*.php")) as $filename ) {
+			include $filename;
+		}
 		do_action(self::PLUGIN_INIT_HOOK);
 	}
 

@@ -1,9 +1,10 @@
 <?php
  
 class BuggyPress_Resolution extends BuggyPress_Taxonomy {
+	const TAXONOMY_ID = 'issue_resolution';
 	protected $label_singular = 'Resolution';
 	protected $label_plural = 'Resolutions';
-	protected $id = 'issue_resolution';
+	protected $id = self::TAXONOMY_ID;
 	protected $default_terms = array(
 		'fixed' => array('name' => 'Fixed', 'description' => 'All necessary action has been taken'),
 		'wont-fix' => array('name' => 'Will Not Fix', 'description' => 'A decision has been made to leave it as-is'),
@@ -46,5 +47,10 @@ class BuggyPress_Resolution extends BuggyPress_Taxonomy {
 			'hierarchical' => FALSE,
 		);
 		return $args;
+	}
+
+	public static function get_terms( $post_id ) {
+		$terms = wp_get_object_terms($post_id, self::TAXONOMY_ID);
+		return $terms;
 	}
 }

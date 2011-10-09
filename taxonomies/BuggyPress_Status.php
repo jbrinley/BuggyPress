@@ -1,9 +1,10 @@
 <?php
  
 class BuggyPress_Status extends BuggyPress_Taxonomy {
+	const TAXONOMY_ID = 'issue_status';
 	protected $label_singular = 'Status';
 	protected $label_plural = 'Statuses';
-	protected $id = 'issue_status';
+	protected $id = self::TAXONOMY_ID;
 	protected $default_terms = array(
 		'open' => array('name' => 'Open', 'description' => 'Not yet complete'),
 		'resolved' => array('name' => 'Resolved', 'description' => 'Completed, but not yet verified'),
@@ -46,5 +47,10 @@ class BuggyPress_Status extends BuggyPress_Taxonomy {
 			'hierarchical' => FALSE,
 		);
 		return $args;
+	}
+
+	public static function get_terms( $post_id ) {
+		$terms = wp_get_object_terms($post_id, self::TAXONOMY_ID);
+		return $terms;
 	}
 }
