@@ -100,8 +100,8 @@ class BuggyPress_Plugin {
 	public static function autoloader( $class ) {
 		$files = array(
 			self::plugin_path($class.'.php'),
-			self::plugin_path('post_types'.DIRECTORY_SEPARATOR.$class.'.php'),
-			self::plugin_path('meta_boxes'.DIRECTORY_SEPARATOR.$class.'.php'),
+			self::plugin_path('post-types'.DIRECTORY_SEPARATOR.$class.'.php'),
+			self::plugin_path('meta-boxes'.DIRECTORY_SEPARATOR.$class.'.php'),
 			self::plugin_path('taxonomies'.DIRECTORY_SEPARATOR.$class.'.php'),
 		);
 		foreach ( $files as $file ) {

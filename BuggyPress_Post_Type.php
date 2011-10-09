@@ -345,4 +345,17 @@ abstract class BuggyPress_Post_Type extends BuggyPress_Plugin {
 		// looks like the answer is Yes
 		return TRUE;
 	}
+
+	public function select_post_template( $template ) {
+		if ( is_single() && get_query_var('post_type') == $this->post_type ) {
+			// check in the theme's loyalty directory
+			if ( $found = locate_template(array('buggypress/'.$this->post_type.'.php'), FALSE) ) {
+				return $found;
+			}
+			if ( file_exists(self::plugin_path('post-templates/'.$this->post_type.'.php')) ) {
+				return self::plugin_path('post-templates/'.$this->post_type.'.php');
+			}
+		}
+		return $template;
+	}
 }

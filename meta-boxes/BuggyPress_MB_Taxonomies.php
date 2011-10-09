@@ -50,14 +50,13 @@ class BuggyPress_MB_Taxonomies extends BuggyPress_Meta_Box {
 			$options = wp_parse_args($options, $defaults);
 			$this->taxonomies[$tax] = $options;
 		}
+
+		add_filter('buggpress_issue_changes', array($this, 'filter_change_list'), 10, 2);
 	}
 
 	public function render( $post ) {
 		foreach ( $this->taxonomies as $taxonomy => $args ) {
-    	$current = wp_get_object_terms($post->ID, $taxonomy);
-			if ( $current && $term = reset($current) ) {
-				$this->taxonomies[$taxonomy]['selected'] = $term->term_id;
-			}
+			$this->taxonomies[$taxonomy]['selected'] = $this->get_current_value($post->ID, $taxonomy);
 		}
 		include(self::plugin_path('views'.DIRECTORY_SEPARATOR.'meta-box-taxonomies.php'));
 	}
@@ -69,5 +68,50 @@ class BuggyPress_MB_Taxonomies extends BuggyPress_Meta_Box {
 		foreach ( $_POST[self::FIELD_GROUP] as $taxonomy => $term_id ) {
       wp_set_object_terms($post_id, (int)$term_id, $taxonomy);
 		}
+	}
+
+	/**
+	 * Get the currently selected term for the given post and taxonomy
+	 *
+	 * @param int $post_id
+	 * @param string $taxonomy
+	 * @return int
+	 */
+	private function get_current_value( $post_id, $taxonomy ) {
+		$current = wp_get_object_terms($post_id, $taxonomy);
+		if ( $current && $term = reset($current) ) {
+			return $term->term_id;
+		}
+		return 0;
+	}
+
+	/**
+	 * Get issue details that have changed
+	 *
+	 * @param array $changes
+	 * @param int $post_id
+	 * @return array
+	 */
+	public function filter_change_list( $changes, $post_id ) {
+		if ( !isset($_POST[self::FIELD_GROUP]) || !is_array($_POST[self::FIELD_GROUP]) ) {
+			return $changes;
+		}
+		foreach ( $this->taxonomies as $taxonomy => $args ) {
+			if ( isset($_POST[self::FIELD_GROUP][$taxonomy]) ) {
+				$current_id = $this->get_current_value($post_id, $taxonomy);
+				$current = get_term($current_id, $taxonomy);
+				if ( $current->term_id != $_POST[self::FIELD_GROUP][$taxonomy] ) {
+					$new = get_term($_POST[self::FIELD_GROUP][$taxonomy], $taxonomy);
+					if ( $new ) {
+						$changes[$taxonomy] = array(
+							'label' => $args['label'],
+							'old' => $current->name,
+							'new' => $new->name,
+						);
+					}
+				}
+			}
+		}
+		return $changes;
 	}
 }
