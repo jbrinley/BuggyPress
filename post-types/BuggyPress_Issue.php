@@ -3,7 +3,7 @@
 class BuggyPress_Issue extends BuggyPress_Post_Type {
 	protected $post_type_label_singular = 'Issue';
 	protected $post_type_label_plural = 'Issues';
-	protected $slug = 'issue';
+	protected $slug = 'issues';
 	protected $post_type = 'issue';
 	protected $taxonomies = array();
 
