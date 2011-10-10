@@ -88,8 +88,8 @@ class BuggyPress_Plugin {
 	public static function initialize_plugin() {
 		spl_autoload_register(array(__CLASS__, 'autoloader'));
 		$post_types = array(
-			'BuggyPress_Project',
 			'BuggyPress_Issue',
+			'BuggyPress_Project',
 		);
 		foreach ( $post_types as $pt ) {
 			add_action(self::PLUGIN_INIT_HOOK, array($pt, 'init'));

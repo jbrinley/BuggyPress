@@ -29,8 +29,15 @@ class BuggyPress_MB_Issue_Project extends BuggyPress_Meta_Box {
 		}
 	}
 
-	public function get_project( $post_id ) {
-		return (int)get_post_meta($post_id, self::META_KEY_PROJECT, TRUE);
+	public function get_project( $post_id, $format = 'id' ) {
+		$project_id = (int)get_post_meta($post_id, self::META_KEY_PROJECT, TRUE);
+		switch ( $format ) {
+			case 'object':
+				return $project_id?get_post($project_id):NULL;
+			case 'id':
+			default:
+				return $project_id;
+		}
 	}
 
 	public function set_project( $post_id, $user_id ) {

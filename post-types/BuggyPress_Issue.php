@@ -55,6 +55,11 @@ class BuggyPress_Issue extends BuggyPress_Post_Type {
 		return $issue->meta_boxes['BuggyPress_MB_Assignee']->get_assignee($post_id, 'object');
 	}
 
+	public static function get_project( $post_id ) {
+		$issue = self::get_instance();
+		return $issue->meta_boxes['BuggyPress_MB_Issue_Project']->get_project($post_id, 'object');
+	}
+
 	private static $instance;
 	/**
 	 * Create the instance of the class
@@ -107,12 +112,16 @@ class BuggyPress_Issue extends BuggyPress_Post_Type {
 	public function add_hooks() {
 		parent::add_hooks();
 		add_filter('comment_form_defaults', array($this, 'comment_form_defaults'), 1);
-    add_action('pre_comment_on_post', array($this, 'add_changes_to_comment'), 1);
-    add_action('comment_post', array($this, 'save_comment_form_updates'), 1);
+		add_action('pre_comment_on_post', array($this, 'add_changes_to_comment'), 1);
+		add_action('comment_post', array($this, 'save_comment_form_updates'), 1);
 	}
 
 	public function post_type_args() {
 		$args = parent::post_type_args();
+		$args['rewrite'] = array(
+			'slug' => '%parent_project%'.$this->slug,
+			'with_front' => FALSE,
+		);
 		$args['supports'] = array('title', 'editor', 'thumbnail', 'author', 'excerpt', 'comments', 'revisions');
 		return $args;
 	}

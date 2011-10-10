@@ -52,3 +52,11 @@ function bp_get_the_issue_assignee( $post_id = 0 ) {
 	$user = BuggyPress_Issue::get_assignee($post_id);
 	return $user;
 }
+
+function bp_get_the_project( $post_id = 0 ) {
+	if ( !$post_id ) {
+		$post_id = get_the_ID();
+	}
+	$project = BuggyPress_Issue::get_project($post_id);
+	return $project;
+}
