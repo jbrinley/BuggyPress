@@ -77,10 +77,16 @@ class BuggyPress_MB_Taxonomies extends BuggyPress_Meta_Box {
 	 * @param string $taxonomy
 	 * @return int
 	 */
-	private function get_current_value( $post_id, $taxonomy ) {
+	public function get_current_value( $post_id, $taxonomy, $format = 'id' ) {
 		$current = wp_get_object_terms($post_id, $taxonomy);
 		if ( $current && $term = reset($current) ) {
-			return $term->term_id;
+			switch ( $format ) {
+				case 'object':
+					return $term;
+				case 'id':
+				default:
+					return $term->term_id;
+			}
 		}
 		return 0;
 	}

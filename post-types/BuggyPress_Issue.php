@@ -144,4 +144,24 @@ class BuggyPress_Issue extends BuggyPress_Post_Type {
 		$this->meta_boxes['BuggyPress_MB_Taxonomies']->save($post->ID, $post);
 		$this->meta_boxes['BuggyPress_MB_Assignee']->save($post->ID, $post);
 	}
+
+	public static function get_status( $post_id ) {
+		$issue = self::get_instance();
+		return $issue->meta_boxes['BuggyPress_MB_Taxonomies']->get_current_value($post_id, BuggyPress_Status::TAXONOMY_ID, 'object');
+	}
+
+	public static function get_type( $post_id ) {
+		$issue = self::get_instance();
+		return $issue->meta_boxes['BuggyPress_MB_Taxonomies']->get_current_value($post_id, BuggyPress_Type::TAXONOMY_ID, 'object');
+	}
+
+	public static function get_priority( $post_id ) {
+		$issue = self::get_instance();
+		return $issue->meta_boxes['BuggyPress_MB_Taxonomies']->get_current_value($post_id, BuggyPress_Priority::TAXONOMY_ID, 'object');
+	}
+
+	public static function get_assignee( $post_id ) {
+		$issue = self::get_instance();
+		return $issue->meta_boxes['BuggyPress_MB_Assignee']->get_assignee($post_id, 'object');
+	}
 }

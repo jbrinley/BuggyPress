@@ -31,6 +31,7 @@ get_header(); ?>
 								<p><?php _e('Issue Type'); ?>: <?php bp_the_issue_type(); ?></p>
 								<p><?php _e('Priority'); ?>: <?php bp_the_issue_priority(); ?></p>
 								<p><?php _e('Status'); ?>: <?php bp_the_issue_status(); ?></p>
+								<p><?php _e('Assigned to'); ?>: <?php bp_the_issue_assignee(); ?></p>
 							</div>
 						</header><!-- .entry-header -->
 

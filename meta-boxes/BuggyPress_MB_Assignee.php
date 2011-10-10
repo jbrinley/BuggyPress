@@ -28,8 +28,26 @@ class BuggyPress_MB_Assignee extends BuggyPress_Meta_Box {
 		}
 	}
 
-	public function get_assignee( $post_id ) {
-		return (int)get_post_meta($post_id, self::META_KEY_ASSIGNEE, TRUE);
+	/**
+	 * Get the current assignee for the issue
+	 *
+	 * @param int $post_id
+	 * @param string $format
+	 * @return int|WP_User
+	 */
+	public function get_assignee( $post_id, $format = 'id' ) {
+		$assignee_id = (int)get_post_meta($post_id, self::META_KEY_ASSIGNEE, TRUE);
+		if ( !$assignee_id ) {
+			return 0;
+		}
+		switch ( $format ) {
+			case 'object':
+				$assignee = new WP_User($assignee_id);
+				return $assignee;
+			case 'id':
+			default:
+				return $assignee_id;
+		}
 	}
 
 	public function set_assignee( $post_id, $user_id ) {
@@ -43,9 +61,9 @@ class BuggyPress_MB_Assignee extends BuggyPress_Meta_Box {
 		$current = $this->get_assignee($post_id);
 		if ( $current != $_POST[self::FIELD_ASSIGNEE] ) {
 			if ( $current ) {
-				$user = get_userdata($current);
+				$user = new WP_User($current);
 			}
-			$new = $_POST[self::FIELD_ASSIGNEE]?get_userdata($_POST[self::FIELD_ASSIGNEE]):NULL;
+			$new = $_POST[self::FIELD_ASSIGNEE]?(new WP_User($_POST[self::FIELD_ASSIGNEE])):NULL;
 			$changes['assignee'] = array(
 				'label' => self::__('Assignee'),
 				'old' => $current?$user->display_name:self::__('Unassigned'),
