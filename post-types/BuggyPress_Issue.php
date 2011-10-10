@@ -7,6 +7,54 @@ class BuggyPress_Issue extends BuggyPress_Post_Type {
 	protected $post_type = 'issue';
 	protected $taxonomies = array();
 
+	/**
+	 * Get the status taxonomy term assigned to the post
+	 *
+	 * @static
+	 * @param int $post_id
+	 * @return object
+	 */
+	public static function get_status( $post_id ) {
+		$issue = self::get_instance();
+		return $issue->meta_boxes['BuggyPress_MB_Taxonomies']->get_current_value($post_id, BuggyPress_Status::TAXONOMY_ID, 'object');
+	}
+
+	/**
+	 * Get the type taxonomy term assigned to the post
+	 *
+	 * @static
+	 * @param int $post_id
+	 * @return object
+	 */
+	public static function get_type( $post_id ) {
+		$issue = self::get_instance();
+		return $issue->meta_boxes['BuggyPress_MB_Taxonomies']->get_current_value($post_id, BuggyPress_Type::TAXONOMY_ID, 'object');
+	}
+
+	/**
+	 * Get the priority taxonomy term assigned to the post
+	 *
+	 * @static
+	 * @param int $post_id
+	 * @return object
+	 */
+	public static function get_priority( $post_id ) {
+		$issue = self::get_instance();
+		return $issue->meta_boxes['BuggyPress_MB_Taxonomies']->get_current_value($post_id, BuggyPress_Priority::TAXONOMY_ID, 'object');
+	}
+
+	/**
+	 * Get the user assigned to the issue
+	 *
+	 * @static
+	 * @param int $post_id
+	 * @return WP_User
+	 */
+	public static function get_assignee( $post_id ) {
+		$issue = self::get_instance();
+		return $issue->meta_boxes['BuggyPress_MB_Assignee']->get_assignee($post_id, 'object');
+	}
+
 	private static $instance;
 	/**
 	 * Create the instance of the class
@@ -70,6 +118,8 @@ class BuggyPress_Issue extends BuggyPress_Post_Type {
 	}
 
 	/**
+	 * Add the issue details to the comment form
+	 *
 	 * @param array $defaults
 	 * @return array
 	 */
@@ -78,6 +128,7 @@ class BuggyPress_Issue extends BuggyPress_Post_Type {
 		if ( $post->post_type == $this->post_type ) {
 			// the meta boxes are already rendering the exact same thing in the admin
 			// if need be in the future, the meta boxes can distinguish based on is_admin()
+			// TODO: restrict this to authorized users
 			ob_start();
 			$this->meta_boxes['BuggyPress_MB_Taxonomies']->render($post);
 			$this->meta_boxes['BuggyPress_MB_Assignee']->render($post);
@@ -119,17 +170,28 @@ class BuggyPress_Issue extends BuggyPress_Post_Type {
 		$_POST['comment'] .= $extra;
 	}
 
+	/**
+	 * Utility function for printing change messages
+	 *
+	 * @param string $label
+	 * @param string $old_value
+	 * @param string $new_value
+	 * @return string
+	 */
 	private function get_change_comment( $label, $old_value, $new_value ) {
 		$message = sprintf(self::__('%s changed from <em>%s</em> to <em>%s</em>'), $label, $old_value, $new_value);
 		return apply_filters('buggypress_issue_change_comment', $message, $label, $old_value, $new_value);
 	}
 
   /**
+	 * Save updates that came in via the comment form
+	 * 
    * @param int $comment_ID
    * @param mixed (int|string) $approved 1 for approved, 0 for not approved, 'spam' for spam
    * @return void
    */
 	public function save_comment_form_updates( $comment_ID, $approved = 1 ) {
+		// TODO: security check: is the user allowed to update the issue via the comment form
 		if ( $approved != 1 ) {
 			return;
 		}
@@ -143,25 +205,5 @@ class BuggyPress_Issue extends BuggyPress_Post_Type {
 		}
 		$this->meta_boxes['BuggyPress_MB_Taxonomies']->save($post->ID, $post);
 		$this->meta_boxes['BuggyPress_MB_Assignee']->save($post->ID, $post);
-	}
-
-	public static function get_status( $post_id ) {
-		$issue = self::get_instance();
-		return $issue->meta_boxes['BuggyPress_MB_Taxonomies']->get_current_value($post_id, BuggyPress_Status::TAXONOMY_ID, 'object');
-	}
-
-	public static function get_type( $post_id ) {
-		$issue = self::get_instance();
-		return $issue->meta_boxes['BuggyPress_MB_Taxonomies']->get_current_value($post_id, BuggyPress_Type::TAXONOMY_ID, 'object');
-	}
-
-	public static function get_priority( $post_id ) {
-		$issue = self::get_instance();
-		return $issue->meta_boxes['BuggyPress_MB_Taxonomies']->get_current_value($post_id, BuggyPress_Priority::TAXONOMY_ID, 'object');
-	}
-
-	public static function get_assignee( $post_id ) {
-		$issue = self::get_instance();
-		return $issue->meta_boxes['BuggyPress_MB_Assignee']->get_assignee($post_id, 'object');
 	}
 }
