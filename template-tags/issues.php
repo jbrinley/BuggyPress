@@ -60,3 +60,17 @@ function bp_get_the_project( $post_id = 0 ) {
 	$project = BuggyPress_Issue::get_project($post_id);
 	return $project;
 }
+
+function bp_get_the_project_link( $post_id = 0 ) {
+	$project = bp_get_the_project($post_id);
+	if ( !$project ) {
+		return '';
+	}
+	$url = get_permalink($project);
+	$link = sprintf('<a href="%s">%s</a>', $url, get_the_title($project));
+	return apply_filters('bp_get_the_project_link', $link, $project);
+}
+
+function bp_the_project_link() {
+	echo apply_filters('bp_the_project_link', bp_get_the_project_link());
+}

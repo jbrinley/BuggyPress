@@ -1,10 +1,11 @@
 <?php
  
 class BuggyPress_Issue extends BuggyPress_Post_Type {
+	const POST_TYPE = 'issue';
 	protected $post_type_label_singular = 'Issue';
 	protected $post_type_label_plural = 'Issues';
 	protected $slug = 'issues';
-	protected $post_type = 'issue';
+	protected $post_type = self::POST_TYPE;
 	protected $taxonomies = array();
 
 	/**

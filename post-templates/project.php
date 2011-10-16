@@ -25,28 +25,52 @@ get_header(); ?>
 							<h1 class="entry-title"><?php the_title(); ?></h1>
 
 							<div class="entry-meta">
-								<?php printf( __( '<span class="sep">Posted on </span><a href="%1$s" title="%2$s" rel="bookmark"><time class="entry-date" datetime="%3$s" pubdate>%4$s</time></a><span class="by-author"> <span class="sep"> by </span> <span class="author vcard"><a class="url fn n" href="%5$s" title="%6$s" rel="author">%7$s</a></span></span>', 'twentyeleven' ),
-									esc_url( get_permalink() ),
-									esc_attr( get_the_time() ),
-									esc_attr( get_the_date( 'c' ) ),
-									esc_html( get_the_date() ),
-									esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
-									sprintf( esc_attr__( 'View all posts by %s', 'twentyeleven' ), get_the_author() ),
-									esc_html( get_the_author() )
-								); ?>
 							</div><!-- .entry-meta -->
-							<div class="issue-details">
-								<p><?php _e('Project'); ?>: <?php bp_the_project_link(); ?></p>
-								<p><?php _e('Issue Type'); ?>: <?php bp_the_issue_type(); ?></p>
-								<p><?php _e('Priority'); ?>: <?php bp_the_issue_priority(); ?></p>
-								<p><?php _e('Status'); ?>: <?php bp_the_issue_status(); ?></p>
-								<p><?php _e('Assigned to'); ?>: <?php bp_the_issue_assignee(); ?></p>
-							</div>
 						</header><!-- .entry-header -->
 
 						<div class="entry-content">
 							<?php the_content(); ?>
 							<?php wp_link_pages( array( 'before' => '<div class="page-link"><span>' . __( 'Pages:', 'twentyeleven' ) . '</span>', 'after' => '</div>' ) ); ?>
+							<?php
+								$issues = new WP_Query(array(
+									'post_type' => BuggyPress_Issue::POST_TYPE,
+									'tax_query' => array(
+										array(
+											'taxonomy' => BuggyPress_Status::TAXONOMY_ID,
+											'field' => 'slug',
+											'terms' => 'open',
+											'operator' => 'IN',
+										),
+									),
+									'meta_query' => array(
+										array(
+											'key' => BuggyPress_MB_Issue_Project::META_KEY_PROJECT,
+											'value' => get_the_ID(),
+										),
+									),
+								));
+							?>
+							<div class="bp-issues">
+								<?php if ( $issues->have_posts() ): ?>
+									<h3><?php _e('Open Issues'); ?></h3>
+									<ul>
+										<?php while ( $issues->have_posts() ): ?>
+											<?php $issues->the_post(); ?>
+											<li>
+												<h4><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
+												<p>
+													<?php _e('Priority'); ?>: <?php bp_the_issue_priority(); ?>
+													&bull;
+													<?php _e('Assigned to'); ?>: <?php bp_the_issue_assignee(); ?>
+												</p>
+											</li>
+										<?php endwhile; ?>
+									</ul>
+									<?php rewind_posts(); the_post(); ?>
+								<?php else: ?>
+									<h3><?php _e('No Open Issues'); ?></h3>
+								<?php endif; ?>
+							</div>
 						</div><!-- .entry-content -->
 
 						<footer class="entry-meta">

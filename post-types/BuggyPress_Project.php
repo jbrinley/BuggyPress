@@ -1,10 +1,11 @@
 <?php
  
 class BuggyPress_Project extends BuggyPress_Post_Type {
+	const POST_TYPE = 'project';
 	protected $post_type_label_singular = 'Project';
 	protected $post_type_label_plural = 'Projects';
 	protected $slug = 'projects';
-	protected $post_type = 'project';
+	protected $post_type = self::POST_TYPE;
 
 	private static $instance;
 	/**
