@@ -112,6 +112,7 @@ class BuggyPress_Issue extends BuggyPress_Post_Type {
 
 	public function add_hooks() {
 		parent::add_hooks();
+		add_action('init', array($this, 'register_permissions'), 10, 0);
 		add_filter('comment_form_defaults', array($this, 'comment_form_defaults'), 1);
 		add_action('pre_comment_on_post', array($this, 'add_changes_to_comment'), 1);
 		add_action('comment_post', array($this, 'save_comment_form_updates'), 1);
@@ -119,12 +120,27 @@ class BuggyPress_Issue extends BuggyPress_Post_Type {
 
 	public function post_type_args() {
 		$args = parent::post_type_args();
+		$args['capability_type'] = self::POST_TYPE;
+		$args['capabilities'] = array(
+			'read' => 'read_issues',
+		);
 		$args['rewrite'] = array(
 			'slug' => '%parent_project%'.$this->slug,
 			'with_front' => FALSE,
 		);
 		$args['supports'] = array('title', 'editor', 'thumbnail', 'author', 'excerpt', 'comments', 'revisions');
 		return $args;
+	}
+
+	public function register_permissions() {
+		foreach ( array( 'administrator', 'editor') as $role_name ) {
+			$role = get_role($role_name);
+			$role->add_cap('read_issues');
+			$role->add_cap('read_private_issues');
+			$role->add_cap('edit_issues');
+			$role->add_cap('edit_others_issues');
+			$role->add_cap('publish_issues');
+		}
 	}
 
 	/**
