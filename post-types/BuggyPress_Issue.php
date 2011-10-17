@@ -113,6 +113,8 @@ class BuggyPress_Issue extends BuggyPress_Post_Type {
 	public function add_hooks() {
 		parent::add_hooks();
 		add_action('init', array($this, 'register_permissions'), 10, 0);
+		add_filter('posts_where', array($this, 'filter_query_where'), 10, 2);
+		add_filter('posts_join', array($this, 'filter_query_join'), 10, 2);
 		add_filter('comment_form_defaults', array($this, 'comment_form_defaults'), 1);
 		add_action('pre_comment_on_post', array($this, 'add_changes_to_comment'), 1);
 		add_action('comment_post', array($this, 'save_comment_form_updates'), 1);
@@ -141,6 +143,81 @@ class BuggyPress_Issue extends BuggyPress_Post_Type {
 			$role->add_cap('edit_others_issues');
 			$role->add_cap('publish_issues');
 		}
+	}
+
+	/**
+	 * Add the project meta to the query
+	 *
+	 * @param string $join
+	 * @param WP_Query $query
+	 * @return string
+	 */
+	public function filter_query_join( $join, $query ) {
+		global $wpdb;
+		if ( $query->query_vars['post_type'] == self::POST_TYPE
+				 || ( is_array($query->query_vars['post_type']) && in_array(self::POST_TYPE, $query->query_vars['post_type']) )
+		) {
+			$join .= " LEFT JOIN {$wpdb->postmeta} bp_issue_project_meta ON {$wpdb->posts}.ID=bp_issue_project_meta.post_id AND bp_issue_project_meta.meta_key='".BuggyPress_MB_Issue_Project::META_KEY_PROJECT."'";
+		}
+		return $join;
+	}
+
+	/**
+	 * Filter out issues from projects that the user doesn't have access to
+	 *
+	 * @param string $where
+	 * @param WP_Query $query
+	 * @return string
+	 */
+	public function filter_query_where( $where, $query ) {
+		if ( $query->query_vars['post_type'] == self::POST_TYPE
+				 || ( is_array($query->query_vars['post_type']) && in_array(self::POST_TYPE, $query->query_vars['post_type']) )
+		) {
+			if ( !current_user_can('read_issues') ) {
+				// get a list of all public projects
+				$projects = array();
+				$posts = get_posts(array(
+					'post_type' => BuggyPress_Project::POST_TYPE,
+					'meta_query' => array(
+						array(
+							'key' => BuggyPress_MB_Permissions::META_KEY_VISIBILITY,
+							'value' => is_user_logged_in()?array(BuggyPress_MB_Permissions::ALL, BuggyPress_MB_Permissions::USERS):array(BuggyPress_MB_Permissions::ALL),
+							'compare' => 'IN'
+						),
+					),
+				));
+				foreach ( $posts as $post ) {
+					$projects[] = $post->ID;
+				}
+				if ( is_user_logged_in() ) {
+					// get a list of projects the user is a member of
+					$posts = get_posts(array(
+						'post_type' => BuggyPress_Project::POST_TYPE,
+						'meta_query' => array(
+							array(
+								'key' => BuggyPress_MB_Permissions::META_KEY_VISIBILITY,
+								'value' => array(BuggyPress_MB_Permissions::MEMBERS),
+								'compare' => 'IN'
+							),
+							array(
+								'key' => BuggyPress_MB_Members::META_KEY_MEMBERS,
+								'value' => get_current_user_id(),
+							),
+						),
+					));
+					foreach ( $posts as $post ) {
+						$projects[] = $post->ID;
+					}
+				}
+				global $wpdb;
+				if ( $projects ) {
+					$where .= " AND ( {$wpdb->posts}.post_type != '{$this->post_type}' OR bp_issue_project_meta.meta_value IN (".implode(',', $projects).") )";
+				} else {
+					$where .= " AND {$wpdb->posts}.post_type != '{$this->post_type}'";
+				}
+			}
+		}
+		return $where;
 	}
 
 	/**
