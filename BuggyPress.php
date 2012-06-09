@@ -5,10 +5,10 @@ Plugin URI: http://flightless.us/
 Description: A bug-tracking/issue-tracking/task-management system.
 Author: Flightless
 Author URI: http://flightless.us/
-Version: 0.4
+Version: 0.5
 */
 /*
-Copyright (c) 2011 Flightless, Inc. http://flightless.us/
+Copyright (c) 2012 Flightless, Inc. http://flightless.us/
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
