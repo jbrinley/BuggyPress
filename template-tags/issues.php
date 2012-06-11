@@ -6,10 +6,8 @@ function bp_the_issue_type() {
 }
 
 function bp_get_the_issue_type( $post_id = 0 ) {
-	if ( !$post_id ) {
-		$post_id = get_the_ID();
-	}
-	$term = BuggyPress_Issue::get_type($post_id);
+	$issue = bp_get_issue($post_id);
+	$term = $issue->get_type();
 	return $term;
 }
 
@@ -19,10 +17,8 @@ function bp_the_issue_priority() {
 }
 
 function bp_get_the_issue_priority( $post_id = 0 ) {
-	if ( !$post_id ) {
-		$post_id = get_the_ID();
-	}
-	$term = BuggyPress_Issue::get_priority($post_id);
+	$issue = bp_get_issue($post_id);
+	$term = $issue->get_priority($post_id);
 	return $term;
 }
 
@@ -32,10 +28,8 @@ function bp_the_issue_status() {
 }
 
 function bp_get_the_issue_status( $post_id = 0 ) {
-	if ( !$post_id ) {
-		$post_id = get_the_ID();
-	}
-	$term = BuggyPress_Issue::get_status($post_id);
+	$issue = bp_get_issue($post_id);
+	$term = $issue->get_status($post_id);
 	return $term;
 }
 
@@ -45,20 +39,24 @@ function bp_the_issue_assignee() {
 	echo apply_filters('buggypress_issue_assignee', $assignee->display_name, $assignee);
 }
 
+/**
+ * @param int $post_id
+ * @return WP_User|NULL
+ */
 function bp_get_the_issue_assignee( $post_id = 0 ) {
-	if ( !$post_id ) {
-		$post_id = get_the_ID();
+	$issue = bp_get_issue($post_id);
+	$user_id = $issue->get_assignee_id($post_id);
+	if ( $user_id ) {
+		return new WP_User($user_id);
+	} else {
+		return NULL;
 	}
-	$user = BuggyPress_Issue::get_assignee($post_id);
-	return $user;
 }
 
 function bp_get_the_project( $post_id = 0 ) {
-	if ( !$post_id ) {
-		$post_id = get_the_ID();
-	}
-	$project = BuggyPress_Issue::get_project($post_id);
-	return $project;
+	$issue = bp_get_issue($post_id);
+	$project_id = $issue->get_project_id();
+	return $project_id;
 }
 
 function bp_get_the_project_link( $post_id = 0 ) {
@@ -73,4 +71,15 @@ function bp_get_the_project_link( $post_id = 0 ) {
 
 function bp_the_project_link() {
 	echo apply_filters('bp_the_project_link', bp_get_the_project_link());
+}
+
+/**
+ * @param int $post_id
+ * @return BuggyPress_Issue
+ */
+function bp_get_issue( $post_id = 0 ) {
+	if ( !$post_id ) {
+		$post_id = get_the_ID();
+	}
+	return new BuggyPress_Issue($post_id);
 }

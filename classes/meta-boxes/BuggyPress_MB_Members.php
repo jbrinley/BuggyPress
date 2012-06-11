@@ -1,19 +1,14 @@
 <?php
  
-class BuggyPress_MB_Members extends BuggyPress_Meta_Box {
+class BuggyPress_MB_Members extends Flightless_Meta_Box {
 	const META_KEY_MEMBERS = '_buggypress_project_member';
 	const FIELD_MEMBERS = 'buggypress_project_member';
 	const META_KEY_ADMINS = '_buggypress_project_admin';
 	const FIELD_ADMINS = 'buggypress_project_admin';
 
-	protected $defaults = array(
-		'title' => 'Users',
-		'context' => 'side',
-		'priority' => 'default',
-		'callback_args' => NULL,
-	);
-
 	public function __construct( $id, $args = array() ) {
+		$this->defaults['title'] = __('Users', 'buggypress');
+		$this->defaults['contect'] = 'side';
 		parent::__construct($id, $args);
 	}
 
@@ -21,7 +16,7 @@ class BuggyPress_MB_Members extends BuggyPress_Meta_Box {
 		$users = get_users();
 		$members = $this->get_members($post->ID);
 		$admins = $this->get_administrators($post->ID);
-		include(self::plugin_path('views'.DIRECTORY_SEPARATOR.'meta-box-members.php'));
+		include(BuggyPress::plugin_path('views'.DIRECTORY_SEPARATOR.'meta-box-members.php'));
 	}
 
 	public function save( $post_id, $post ) {

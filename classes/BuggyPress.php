@@ -1,36 +1,14 @@
 <?php
 
-class BuggyPress_Plugin {
+class BuggyPress {
 	const PLUGIN_NAME = 'BuggyPress';
 	const TEXT_DOMAIN = 'buggypress';
 	const MIN_PHP_VERSION = '5.2';
 	const MIN_WP_VERSION = '3.2';
-	const VERSION = '0.4';
-	const DB_VERSION = 1;
-	const PLUGIN_INIT_HOOK = 'buggypress_init';
+	const VERSION = '0.5';
+	const DB_VERSION = 2;
+	const PLUGIN_INIT_HOOK = 'buggypress_loaded';
 	const DEBUG = FALSE;
-
-	/**
-	 * Return $string after translating it with the plugin's text domain
-	 *
-	 * @static
-	 * @param string $string
-	 * @return string|void
-	 */
-	protected static function __( $string ) {
-		return __($string, self::TEXT_DOMAIN);
-	}
-
-	/**
-	 * Echo $string after translating it with the plugin's text domain
-	 *
-	 * @static
-	 * @param string $string
-	 * @return void
-	 */
-	protected static function _e( $string ) {
-		_e($string, self::TEXT_DOMAIN);
-	}
 
 	/**
 	 * Get the absolute system path to the plugin directory, or a file therein
@@ -39,8 +17,8 @@ class BuggyPress_Plugin {
 	 * @param string $path
 	 * @return string
 	 */
-	protected static function plugin_path( $path ) {
-		$base = dirname(__FILE__);
+	public static function plugin_path( $path ) {
+		$base = dirname(dirname(__FILE__));
 		if ( $path ) {
 			return trailingslashit($base).$path;
 		} else {
@@ -54,7 +32,7 @@ class BuggyPress_Plugin {
 	 * @param string $path
 	 * @return string
 	 */
-	protected static function plugin_url( $path ) {
+	public static function plugin_url( $path ) {
 		return plugins_url($path, __FILE__);
 	}
 
@@ -82,16 +60,17 @@ class BuggyPress_Plugin {
 	 * @return void
 	 */
 	public static function failed_to_load_notices( $php_version = self::MIN_PHP_VERSION, $wp_version = self::MIN_WP_VERSION ) {
-		printf( '<div class="error"><p>%s</p></div>', sprintf( self::__( '%1$s requires WordPress %2$s or higher and PHP %3$s or higher.' ), self::PLUGIN_NAME, $wp_version, $php_version ) );
+		printf( '<div class="error"><p>%s</p></div>', sprintf( __( '%1$s requires WordPress %2$s or higher and PHP %3$s or higher.', 'buggypress' ), self::PLUGIN_NAME, $wp_version, $php_version ) );
 	}
 
 	public static function initialize_plugin() {
 		spl_autoload_register(array(__CLASS__, 'autoloader'));
-		$post_types = array(
+		$to_init = array(
 			'BuggyPress_Issue',
 			'BuggyPress_Project',
+			'BuggyPress_CommentForms'
 		);
-		foreach ( $post_types as $pt ) {
+		foreach ( $to_init as $pt ) {
 			add_action(self::PLUGIN_INIT_HOOK, array($pt, 'init'));
 		}
 
@@ -103,16 +82,14 @@ class BuggyPress_Plugin {
 	}
 
 	public static function autoloader( $class ) {
-		$files = array(
-			self::plugin_path($class.'.php'),
-			self::plugin_path('post-types'.DIRECTORY_SEPARATOR.$class.'.php'),
-			self::plugin_path('meta-boxes'.DIRECTORY_SEPARATOR.$class.'.php'),
-			self::plugin_path('taxonomies'.DIRECTORY_SEPARATOR.$class.'.php'),
-		);
-		foreach ( $files as $file ) {
+		if ( strpos($class, 'BuggyPress') === 0 ) {
+			if ( strpos($class, 'BuggyPress_MB') === 0 ) {
+				$file = self::plugin_path('classes'.DIRECTORY_SEPARATOR.'meta-boxes'.DIRECTORY_SEPARATOR.$class.'.php');
+			} else {
+				$file = self::plugin_path('classes'.DIRECTORY_SEPARATOR.$class.'.php');
+			}
 			if ( file_exists($file) ) {
 				include_once($file);
-				break;
 			}
 		}
 	}

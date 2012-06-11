@@ -31,25 +31,27 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 
-/**
- * Load all the plugin files and initialize appropriately
- *
- * @return void
- */
-function BuggyPress_load() {
-	if ( !class_exists('BuggyPress') ) {
-		// load the base class
-		require_once 'BuggyPress_Plugin.php';
+if ( !function_exists('BuggyPress_load') ) {
+	/**
+	 * Load all the plugin files and initialize appropriately
+	 *
+	 * @return void
+	 */
+	function BuggyPress_load() {
+		if ( !class_exists('BuggyPress') ) {
+			// load the base class
+			require_once 'classes/BuggyPress.php';
 
-		if ( !BuggyPress_Plugin::prerequisites_met(phpversion(), get_bloginfo('version')) ) {
-			// let the user know prerequisites weren't met
-			add_action('admin_head', array('BuggyPress_Plugin', 'failed_to_load_notices'), 0, 0);
-			return;
+			if ( !BuggyPress::prerequisites_met(phpversion(), get_bloginfo('version')) ) {
+				// let the user know prerequisites weren't met
+				add_action('admin_head', array('BuggyPress', 'failed_to_load_notices'), 0, 0);
+				return;
+			}
+
+			add_action('plugins_loaded', array('BuggyPress', 'initialize_plugin'), -100, 0);
 		}
-
-		add_action('plugins_loaded', array('BuggyPress_Plugin', 'initialize_plugin'), -100, 0);
 	}
-}
 
-// Fire it up!
-BuggyPress_load();
+	// Fire it up!
+	BuggyPress_load();
+}

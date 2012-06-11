@@ -1,6 +1,6 @@
 <?php
  
-class BuggyPress_MB_Permissions extends BuggyPress_Meta_Box {
+class BuggyPress_MB_Permissions extends Flightless_Meta_Box {
 	const META_KEY_VISIBILITY = '_buggypress_project_visibility';
 	const FIELD_VISIBILITY = 'buggypress_project_visibility';
 
@@ -11,21 +11,16 @@ class BuggyPress_MB_Permissions extends BuggyPress_Meta_Box {
 	const USERS = 'users';
 	const ALL = 'public';
 
-	protected $defaults = array(
-		'title' => 'Permissions',
-		'context' => 'side',
-		'priority' => 'default',
-		'callback_args' => NULL,
-	);
-
 	public function __construct( $id, $args = array() ) {
+		$this->defaults['title'] = __('Permissions', 'buggypress');
+		$this->defaults['contect'] = 'side';
 		parent::__construct($id, $args);
 	}
 
 	public function render( $post ) {
 		$visibility = $this->get_visibility($post->ID);
 		$commenting = $this->get_commenting($post->ID);
-		include(self::plugin_path('views'.DIRECTORY_SEPARATOR.'meta-box-permissions.php'));
+		include(BuggyPress::plugin_path('views'.DIRECTORY_SEPARATOR.'meta-box-permissions.php'));
 	}
 
 	public function save( $post_id, $post ) {

@@ -1,17 +1,11 @@
 <?php
  
-class BuggyPress_MB_Taxonomies extends BuggyPress_Meta_Box {
+class BuggyPress_MB_Taxonomies extends Flightless_Meta_Box {
 	const FIELD_GROUP = 'buggypress_taxonomies';
 	protected $taxonomies = array();
 
-	protected $defaults = array(
-		'title' => 'Issue Details',
-		'context' => 'side',
-		'priority' => 'default',
-		'callback_args' => NULL,
-	);
-
 	public function __construct( $id, $args = array() ) {
+		$this->defaults['title'] = __('Issue Details', 'buggypress');
 		$taxonomies = array();
 		if ( isset($args['taxonomies']) ) {
 			$taxonomies = $args['taxonomies'];
@@ -44,7 +38,7 @@ class BuggyPress_MB_Taxonomies extends BuggyPress_Meta_Box {
 				'depth' => 0,
 				'tab_index' => 0,
 				'taxonomy' => $tax,
-				'hide_if_empty' => false,
+				'hide_if_empty' => FALSE,
 				'label' => $tax,
 			);
 			$options = wp_parse_args($options, $defaults);
@@ -58,7 +52,7 @@ class BuggyPress_MB_Taxonomies extends BuggyPress_Meta_Box {
 		foreach ( $this->taxonomies as $taxonomy => $args ) {
 			$this->taxonomies[$taxonomy]['selected'] = $this->get_current_value($post->ID, $taxonomy);
 		}
-		include(self::plugin_path('views'.DIRECTORY_SEPARATOR.'meta-box-taxonomies.php'));
+		include(BuggyPress::plugin_path('views'.DIRECTORY_SEPARATOR.'meta-box-taxonomies.php'));
 	}
 
 	public function save( $post_id, $post ) {
@@ -66,8 +60,19 @@ class BuggyPress_MB_Taxonomies extends BuggyPress_Meta_Box {
 			return;
 		}
 		foreach ( $_POST[self::FIELD_GROUP] as $taxonomy => $term_id ) {
-      wp_set_object_terms($post_id, (int)$term_id, $taxonomy);
+			$this->set_value($post_id, (int)$term_id, $taxonomy);
 		}
+	}
+
+	/**
+	 * Set the term for the post
+	 *
+	 * @param int $post_id
+	 * @param int|string $term_id Term ID or slug
+	 * @param string $taxonomy
+	 */
+	public function set_value( $post_id, $term_id, $taxonomy ) {
+		wp_set_object_terms( $post_id, $term_id, $taxonomy );
 	}
 
 	/**
@@ -83,6 +88,8 @@ class BuggyPress_MB_Taxonomies extends BuggyPress_Meta_Box {
 			switch ( $format ) {
 				case 'object':
 					return $term;
+				case 'slug':
+					return $term->slug;
 				case 'id':
 				default:
 					return $term->term_id;

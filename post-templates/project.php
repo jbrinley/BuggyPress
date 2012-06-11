@@ -32,11 +32,12 @@ get_header(); ?>
 							<?php the_content(); ?>
 							<?php wp_link_pages( array( 'before' => '<div class="page-link"><span>' . __( 'Pages:', 'twentyeleven' ) . '</span>', 'after' => '</div>' ) ); ?>
 							<?php
+								// TODO: paging
 								$issues = new WP_Query(array(
 									'post_type' => BuggyPress_Issue::POST_TYPE,
 									'tax_query' => array(
 										array(
-											'taxonomy' => BuggyPress_Status::TAXONOMY_ID,
+											'taxonomy' => 'issue_status',
 											'field' => 'slug',
 											'terms' => 'open',
 											'operator' => 'IN',
@@ -44,7 +45,7 @@ get_header(); ?>
 									),
 									'meta_query' => array(
 										array(
-											'key' => BuggyPress_MB_Issue_Project::META_KEY_PROJECT,
+											'key' => 'issue_project',
 											'value' => get_the_ID(),
 										),
 									),
