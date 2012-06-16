@@ -36,7 +36,7 @@ function bp_get_the_issue_status( $post_id = 0 ) {
 function bp_the_issue_assignee() {
 	$assignee = bp_get_the_issue_assignee();
 	$name = $assignee?$assignee->display_name:__('Unassigned');
-	echo apply_filters('buggypress_issue_assignee', $assignee->display_name, $assignee);
+	echo apply_filters('buggypress_issue_assignee', $name, $assignee);
 }
 
 /**

@@ -49,9 +49,6 @@ class BuggyPress_Issue {
 	 * @param int $post_id
 	 */
 	public function __construct( $post_id ) {
-		if ( !(int)$post_id ) {
-			throw new InvalidArgumentException(__('A valid post ID must be supplied.', 'buggypress'));
-		}
 		$this->post_id = $post_id;
 	}
 
@@ -60,7 +57,46 @@ class BuggyPress_Issue {
 	}
 
 	public function get_post() {
+		if ( !$this->post_id ) {
+			// return a stub post
+			$post = new stdClass();
+			$post->ID = 0;
+			$post->post_status = 'draft';
+			$post->post_type = self::POST_TYPE;
+			$post->post_author = get_current_user_id();
+			$post->post_content = '';
+			$post->post_title = '';
+			return $post;
+		}
 		return get_post($this->post_id);
+	}
+
+	/**
+	 * Save the associated post, overriding existing values with those
+	 * pass in $args
+	 *
+	 * @param array $args New values to set for the post
+	 */
+	public function save_post( $args = array() ) {
+		$post = (array)$this->get_post();
+		$args = wp_parse_args($args, $post);
+		$id = wp_update_post($args);
+		if ( $id && !is_wp_error($id) ) {
+			$this->post_id = $id;
+		}
+	}
+
+	public function get_permalink() {
+		return get_permalink($this->post_id);
+	}
+
+	public function get_title() {
+		return get_the_title($this->post_id);
+	}
+
+	public function get_description() {
+		$post = $this->get_post();
+		return $post->post_content;
 	}
 
 	public function get_status() {
@@ -147,7 +183,7 @@ class BuggyPress_Issue {
 	public static function create_post_type() {
 		self::$cpt = new BuggyPress_Post_Type( self::POST_TYPE );
 		self::$cpt->set_post_type_label( __('Issue', 'buggypress'), __('Issues', 'buggypress') );
-		self::$cpt->slug = '%parent_project%/'._x( 'issues', 'post type slug', 'buggypress' );
+		self::$cpt->slug = _x( 'issues', 'post type slug', 'buggypress' );
 		self::$cpt->add_support(array('comments', 'revisions'));
 
 		self::register_taxonomies();

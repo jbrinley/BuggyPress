@@ -68,7 +68,8 @@ class BuggyPress {
 		$to_init = array(
 			'BuggyPress_Issue',
 			'BuggyPress_Project',
-			'BuggyPress_CommentForms'
+			'BuggyPress_CommentForms',
+			'BuggyPress_NewIssuePage',
 		);
 		foreach ( $to_init as $pt ) {
 			add_action(self::PLUGIN_INIT_HOOK, array($pt, 'init'));

@@ -104,6 +104,7 @@ class BuggyPress_Project {
 		self::$cpt->set_post_type_label( __('Project', 'buggypress'), __('Projects', 'buggypress') );
 		self::$cpt->slug = _x( 'projects', 'post type slug', 'buggypress' );
 		self::$cpt->remove_support(array('author'));
+		self::$cpt->hierarchical = TRUE;
 
 		self::register_taxonomies();
 		self::register_meta_boxes();
