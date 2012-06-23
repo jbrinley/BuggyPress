@@ -1,7 +1,6 @@
 <?php
  
 class BuggyPress_MB_Assignee extends Flightless_Meta_Box {
-	const META_KEY_ASSIGNEE = '_buggypress_assignee';
 	const FIELD_ASSIGNEE = 'buggypress_assignee';
 
 	public function __construct( $id, $args = array() ) {

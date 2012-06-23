@@ -167,13 +167,13 @@ class BuggyPress_Issue {
 
 	public function get_project_id() {
 		if ( is_null($this->project_id) ) {
-			$this->project_id = self::$mb_project->get_project( $this->post_id );
+			$this->project_id = (int)get_post_meta($this->post_id, self::META_KEY_PROJECT, TRUE);
 		}
 		return $this->project_id;
 	}
 
 	public function set_project_id( $project_id ) {
-		self::$mb_project->set_project( $this->post_id, $project_id );
+		update_post_meta($this->post_id, self::META_KEY_PROJECT, (int)$project_id);
 		$this->project_id = $project_id;
 	}
 
