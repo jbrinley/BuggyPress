@@ -23,7 +23,7 @@ class BuggyPress_NewIssuePage {
 		}
 		$path = trailingslashit($path)._x('new', 'new post path', 'buggypress');
 		$router->add_route('buggypress_new_issue', array(
-			'path' => $path.'(/(.+?))?/?$',
+			'path' => '((.+?)/)?'.$path.'/?$',
 			'query_vars' => array(
 				'project_slug' => 2,
 			),
@@ -39,9 +39,14 @@ class BuggyPress_NewIssuePage {
 	}
 
 	public function render_page( $project_slug = '' ) {
-		// TODO - set default for project based on $project_slug
 		remove_filter('the_content', 'wpautop');
 		$issue = new BuggyPress_Issue(0);
+		if ( $project_slug ) {
+			$project = BuggyPress_Project::get_by_slug($project_slug);
+			if ( $project ) {
+				$issue->set_project_id($project->get_id());
+			}
+		}
 		$form = new BuggyPress_UpdateIssueForm($issue);
 		$form->render();
 	}

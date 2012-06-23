@@ -17,8 +17,12 @@ class BuggyPress_UpdateIssueForm {
 	public function render() {
 		printf('<form method="post" action="%s">', $this->action);
 		$this->render_project_select();
-		$this->render_type_field();
 		$this->render_title_field();
+		$this->render_assignee_field();
+		$this->render_type_field();
+		$this->render_status_field();
+		$this->render_priority_field();
+		$this->render_resolution_field();
 		$this->render_description_field();
 		$this->submit_button(__('Create Issue', 'buggypress'));
 		echo '</form>';
@@ -33,7 +37,11 @@ class BuggyPress_UpdateIssueForm {
 		);
 		$this->issue->save_post($args);
 		$this->issue->set_project_id($data['issue-project']);
+		$this->issue->set_assignee_id($data['assignee']);
 		$this->issue->set_type((int)$data['taxonomies']['issue_type']);
+		$this->issue->set_status((int)$data['taxaonomies']['issue_status']);
+		$this->issue->set_priority((int)$data['taxaonomies']['issue_priority']);
+		$this->issue->set_resolution((int)$data['taxaonomies']['issue_resolution']);
 	}
 
 	public function render_project_select() {
@@ -45,13 +53,42 @@ class BuggyPress_UpdateIssueForm {
 				'post_status' => 'publish',
 				'name' => 'issue-project',
 				'selected' => $this->issue->get_project_id(),
+				'show_option_none' => __( ' -- Select Project -- ', 'buggypress' ),
 			)); ?>
 		</p>
 		<?php
 	}
 
+	public function render_assignee_field() {
+		?>
+
+		<p class="issue-assignee">
+			<label for="<?php esc_attr_e('assignee'); ?>"><?php esc_html_e('Assigned To', 'buggypress'); ?>:</label>
+			<?php wp_dropdown_users(array(
+			'show_option_none' => __('Unassigned', 'buggypress'),
+			'include' => '', // TODO: limit to project users
+			'selected' => 0,
+			'name' => 'assignee',
+			'include_selected' => TRUE
+		)); ?>
+		</p>
+		<?php
+	}
+
 	public function render_type_field() {
-		$this->render_taxonomy_select('issue_type', __('Type'));
+		$this->render_taxonomy_select('issue_type', __('Type', 'buggypress'));
+	}
+
+	public function render_status_field() {
+		$this->render_taxonomy_select('issue_status', __('Status', 'buggypress'));
+	}
+
+	public function render_priority_field() {
+		$this->render_taxonomy_select('issue_priority', __('Priority', 'buggypress'));
+	}
+
+	public function render_resolution_field() {
+		$this->render_taxonomy_select('issue_resolution', __('Resolution', 'buggypress'));
 	}
 
 	public function render_title_field() {
@@ -81,7 +118,7 @@ class BuggyPress_UpdateIssueForm {
 			'child_of' => 0,
 			'exclude' => '',
 			'echo' => 1,
-			'selected' => 0,
+			'selected' => $this->issue->get_type(), // TODO: is this returning an object? does that work?
 			'hierarchical' => 0,
 			'name' => 'taxonomies'."[$taxonomy]",
 			'id' => 'taxonomies-'.$taxonomy,

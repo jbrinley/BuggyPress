@@ -19,10 +19,11 @@ class BuggyPress_Project {
 	private static $mb_members = NULL;
 
 	public function __construct( $post_id ) {
-		if ( !(int)$post_id ) {
-			throw new InvalidArgumentException(__('A valid post ID must be supplied.', 'buggypress'));
-		}
 		$this->post_id = $post_id;
+	}
+
+	public function get_id() {
+		return $this->post_id;
 	}
 
 	public function get_administrators() {
@@ -150,6 +151,20 @@ class BuggyPress_Project {
 
 		// put the project slug in place of %parent_project%
 		return str_replace('%parent_project%', self::$cpt->slug.'/'.$project_slug.'/', $post_link);
+	}
+
+	/**
+	 * @static
+	 * @param $slug
+	 * @return BuggyPress_Project|null
+	 */
+	public static function get_by_slug( $slug ) {
+		$post = get_page_by_path( $slug, OBJECT, self::POST_TYPE );
+		if ( $post ) {
+			return new self($post->ID);
+		} else {
+			return NULL;
+		}
 	}
 
 }
