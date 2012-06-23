@@ -2,20 +2,19 @@
 
 class BuggyPress_Issue {
 	const POST_TYPE = 'issue';
+
 	const META_KEY_ASSIGNEE = '_buggypress_assignee';
 	const META_KEY_PROJECT = '_buggypress_project';
 	const META_KEY_MEMBERS = '_buggypress_project_member';
 	const META_KEY_ADMINS = '_buggypress_project_admin';
-	const META_KEY_VISIBILITY = '_buggypress_project_visibility';
-	const META_KEY_COMMENTING = '_buggypress_project_commenting';
 
 	private $post_id = NULL;
 	private $assignee_id = NULL;
 	private $project_id = NULL;
-	private $status = '';
-	private $priority = '';
-	private $resolution = '';
-	private $type = '';
+	private $status = NULL;
+	private $priority = NULL;
+	private $resolution = NULL;
+	private $type = NULL;
 
 	/**
 	 * @var BuggyPress_Post_Type
@@ -56,6 +55,19 @@ class BuggyPress_Issue {
 	 */
 	public function __construct( $post_id ) {
 		$this->post_id = $post_id;
+	}
+
+	/**
+	 * Zero out all instance variables so future gets
+	 * will pull from the DB
+	 */
+	public function flush() {
+		$this->assignee_id = 0;
+		$this->project_id = 0;
+		$this->status = NULL;
+		$this->priority = NULL;
+		$this->resolution = NULL;
+		$this->type = NULL;
 	}
 
 	public function get_id() {
@@ -105,52 +117,53 @@ class BuggyPress_Issue {
 		return $post->post_content;
 	}
 
-	public function get_status() {
-		if ( !$this->status ) {
-			$this->status = self::$mb_taxonomies->get_current_value( $this->post_id, self::$tax_status->get_id(), 'object' );
+	public function get_status( $format = 'id' ) {
+		if ( is_null($this->status) ) {
+			$this->status = $this->get_assigned_term(self::$tax_status->get_id(), 'object');
 		}
-		return $this->status;
+		return $this->format_term($this->status, $format);
 	}
 
 	public function set_status( $status ) {
-		self::$mb_taxonomies->set_value( $this->post_id, $status, self::$tax_status->get_id() );
-		$this->status = $status;
+		$this->set_assigned_term($status, self::$tax_status->get_id());
 	}
 
-	public function get_priority() {
-		if ( !$this->priority ) {
-			$this->priority = self::$mb_taxonomies->get_current_value( $this->post_id, self::$tax_priority->get_id(), 'object' );
+	public function get_priority( $format = 'id' ) {
+		if ( is_null($this->priority) ) {
+			$this->priority = $this->get_assigned_term(self::$tax_priority->get_id(), 'object');
 		}
-		return $this->priority;
+		return $this->format_term($this->priority, $format);
 	}
 
 	public function set_priority( $priority ) {
-		self::$mb_taxonomies->set_value( $this->post_id, $priority, self::$tax_priority->get_id() );
-		$this->priority = $priority;
+		$this->set_assigned_term($priority, self::$tax_priority->get_id());
 	}
 
-	public function get_resolution() {
-		if ( !$this->resolution ) {
-			$this->resolution = self::$mb_taxonomies->get_current_value( $this->post_id, self::$tax_resolution->get_id(), 'object' );
+	public function get_resolution( $format = 'id' ) {
+		if ( is_null($this->resolution) ) {
+			$this->resolution = $this->get_assigned_term(self::$tax_resolution->get_id(), 'object');
 		}
-		return $this->resolution;
+		return $this->format_term($this->resolution, $format);
 	}
 
 	public function set_resolution( $resolution ) {
-		self::$mb_taxonomies->set_value( $this->post_id, $resolution, self::$tax_resolution->get_id() );
-		$this->resolution = $resolution;
+		$this->set_assigned_term($resolution, self::$tax_resolution->get_id());
 	}
 
-	public function get_type() {
-		if ( !$this->type ) {
-			$this->type = self::$mb_taxonomies->get_current_value( $this->post_id, self::$tax_type->get_id(), 'object' );
+	/**
+	 *
+	 * @param string $format
+	 * @return object|string|int|NULL
+	 */
+	public function get_type( $format = 'id') {
+		if ( is_null($this->type) ) {
+			$this->type = $this->get_assigned_term(self::$tax_type->get_id(), 'object');
 		}
-		return $this->type;
+		return $this->format_term($this->type, $format);
 	}
 
 	public function set_type( $type ) {
-		self::$mb_taxonomies->set_value( $this->post_id, $type, self::$tax_type->get_id() );
-		$this->type = $type;
+		$this->set_assigned_term($type, self::$tax_type->get_id());
 	}
 
 	public function get_assignee_id() {
@@ -175,6 +188,40 @@ class BuggyPress_Issue {
 	public function set_project_id( $project_id ) {
 		update_post_meta($this->post_id, self::META_KEY_PROJECT, (int)$project_id);
 		$this->project_id = $project_id;
+	}
+
+	public function get_assigned_term( $taxonomy, $format = 'id' ) {
+		$term = NULL;
+		$terms = wp_get_object_terms($this->post_id, $taxonomy);
+		if ( $terms ) {
+			$term = reset($terms);
+		}
+		return $this->format_term($term, $format);
+	}
+
+	public function set_assigned_term( $term_id, $taxonomy ) {
+		wp_set_object_terms( $this->post_id, $term_id, $taxonomy );
+		$this->flush();
+	}
+
+	/**
+	 * Format a taxonomy term object according to $format
+	 *
+	 * @param object $term A WP term object
+	 * @param string $format 'id', 'object', or 'slug'
+	 *
+	 * @return int|null|string
+	 */
+	private function format_term( $term, $format = 'id' ) {
+		switch ( $format ) {
+			case 'object':
+				return $term?$term:NULL;
+			case 'slug':
+				return $term?$term->slug:'';
+			case 'id':
+			default:
+				return $term?$term->term_id:0;
+		}
 	}
 
 

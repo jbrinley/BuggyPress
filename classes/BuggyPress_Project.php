@@ -3,6 +3,9 @@
 class BuggyPress_Project {
 	const POST_TYPE = 'project';
 
+	const META_KEY_VISIBILITY = '_buggypress_project_visibility';
+	const META_KEY_COMMENTING = '_buggypress_project_commenting';
+
 	private $post_id = 0;
 
 	/**

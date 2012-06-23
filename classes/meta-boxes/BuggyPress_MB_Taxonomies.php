@@ -49,8 +49,9 @@ class BuggyPress_MB_Taxonomies extends Flightless_Meta_Box {
 	}
 
 	public function render( $post ) {
+		$issue = new BuggyPress_Issue($post->ID);
 		foreach ( $this->taxonomies as $taxonomy => $args ) {
-			$this->taxonomies[$taxonomy]['selected'] = $this->get_current_value($post->ID, $taxonomy);
+			$this->taxonomies[$taxonomy]['selected'] = $issue->get_assigned_term($taxonomy);
 		}
 		include(BuggyPress::plugin_path('views'.DIRECTORY_SEPARATOR.'meta-box-taxonomies.php'));
 	}
@@ -59,43 +60,10 @@ class BuggyPress_MB_Taxonomies extends Flightless_Meta_Box {
 		if ( !isset($_POST[self::FIELD_GROUP]) || !is_array($_POST[self::FIELD_GROUP]) ) {
 			return;
 		}
+		$issue = new BuggyPress_Issue($post_id);
 		foreach ( $_POST[self::FIELD_GROUP] as $taxonomy => $term_id ) {
-			$this->set_value($post_id, (int)$term_id, $taxonomy);
+			$issue->set_assigned_term((int)$term_id, $taxonomy);
 		}
-	}
-
-	/**
-	 * Set the term for the post
-	 *
-	 * @param int $post_id
-	 * @param int|string $term_id Term ID or slug
-	 * @param string $taxonomy
-	 */
-	public function set_value( $post_id, $term_id, $taxonomy ) {
-		wp_set_object_terms( $post_id, $term_id, $taxonomy );
-	}
-
-	/**
-	 * Get the currently selected term for the given post and taxonomy
-	 *
-	 * @param int $post_id
-	 * @param string $taxonomy
-	 * @return int
-	 */
-	public function get_current_value( $post_id, $taxonomy, $format = 'id' ) {
-		$current = wp_get_object_terms($post_id, $taxonomy);
-		if ( $current && $term = reset($current) ) {
-			switch ( $format ) {
-				case 'object':
-					return $term;
-				case 'slug':
-					return $term->slug;
-				case 'id':
-				default:
-					return $term->term_id;
-			}
-		}
-		return 0;
 	}
 
 	/**
@@ -109,10 +77,15 @@ class BuggyPress_MB_Taxonomies extends Flightless_Meta_Box {
 		if ( !isset($_POST[self::FIELD_GROUP]) || !is_array($_POST[self::FIELD_GROUP]) ) {
 			return $changes;
 		}
+		$issue = new BuggyPress_Issue($post_id);
 		foreach ( $this->taxonomies as $taxonomy => $args ) {
 			if ( isset($_POST[self::FIELD_GROUP][$taxonomy]) ) {
-				$current_id = $this->get_current_value($post_id, $taxonomy);
-				$current = get_term($current_id, $taxonomy);
+				$current = $issue->get_assigned_term($taxonomy);
+				if ( !$current ) {
+					$current = new stdClass();
+					$current->term_id = 0;
+					$current->name = '';
+				}
 				if ( $current->term_id != $_POST[self::FIELD_GROUP][$taxonomy] ) {
 					$new = get_term($_POST[self::FIELD_GROUP][$taxonomy], $taxonomy);
 					if ( $new ) {

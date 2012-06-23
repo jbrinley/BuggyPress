@@ -118,7 +118,7 @@ class BuggyPress_UpdateIssueForm {
 			'child_of' => 0,
 			'exclude' => '',
 			'echo' => 1,
-			'selected' => $this->issue->get_type(), // TODO: is this returning an object? does that work?
+			'selected' => $this->issue->get_type(),
 			'hierarchical' => 0,
 			'name' => 'taxonomies'."[$taxonomy]",
 			'id' => 'taxonomies-'.$taxonomy,
