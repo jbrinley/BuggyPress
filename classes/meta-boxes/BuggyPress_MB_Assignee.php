@@ -12,48 +12,25 @@ class BuggyPress_MB_Assignee extends Flightless_Meta_Box {
 	}
 
 	public function render( $post ) {
+		$issue = new BuggyPress_Issue($post->ID);
 		$users = get_users();
-		$assignee = $this->get_assignee($post->ID);
+		$assignee = $issue->get_assignee_id();
 		include(BuggyPress::plugin_path('views'.DIRECTORY_SEPARATOR.'meta-box-assignee.php'));
 	}
 
 	public function save( $post_id, $post ) {
 		if ( isset($_POST[self::FIELD_ASSIGNEE]) ) {
-			$this->set_assignee($post_id, (int)$_POST[self::FIELD_ASSIGNEE]);
+			$issue = new BuggyPress_Issue($post_id);
+			$issue->set_assignee_id((int)$_POST[self::FIELD_ASSIGNEE]);
 		}
-	}
-
-	/**
-	 * Get the current assignee for the issue
-	 *
-	 * @param int $post_id
-	 * @param string $format
-	 * @return int|WP_User
-	 */
-	public function get_assignee( $post_id, $format = 'id' ) {
-		$assignee_id = (int)get_post_meta($post_id, self::META_KEY_ASSIGNEE, TRUE);
-		if ( !$assignee_id ) {
-			return 0;
-		}
-		switch ( $format ) {
-			case 'object':
-				$assignee = new WP_User($assignee_id);
-				return $assignee;
-			case 'id':
-			default:
-				return $assignee_id;
-		}
-	}
-
-	public function set_assignee( $post_id, $user_id ) {
-		update_post_meta($post_id, self::META_KEY_ASSIGNEE, (int)$user_id);
 	}
 
 	public function filter_change_list( $changes, $post_id ) {
 		if ( !isset($_POST[self::FIELD_ASSIGNEE]) ) {
 			return $changes;
 		}
-		$current = $this->get_assignee($post_id);
+		$issue = new BuggyPress_Issue($post_id);
+		$current = $issue->get_assignee_id();
 		if ( $current != $_POST[self::FIELD_ASSIGNEE] ) {
 			if ( $current ) {
 				$user = new WP_User($current);

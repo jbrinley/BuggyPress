@@ -2,6 +2,12 @@
 
 class BuggyPress_Issue {
 	const POST_TYPE = 'issue';
+	const META_KEY_ASSIGNEE = '_buggypress_assignee';
+	const META_KEY_PROJECT = '_buggypress_project';
+	const META_KEY_MEMBERS = '_buggypress_project_member';
+	const META_KEY_ADMINS = '_buggypress_project_admin';
+	const META_KEY_VISIBILITY = '_buggypress_project_visibility';
+	const META_KEY_COMMENTING = '_buggypress_project_commenting';
 
 	private $post_id = NULL;
 	private $assignee_id = NULL;
@@ -149,13 +155,13 @@ class BuggyPress_Issue {
 
 	public function get_assignee_id() {
 		if ( is_null($this->assignee_id) ) {
-			$this->assignee_id = self::$mb_assignee->get_assignee( $this->post_id );
+			$this->assignee_id = (int)get_post_meta($this->post_id, self::META_KEY_ASSIGNEE, TRUE);
 		}
 		return $this->assignee_id;
 	}
 
 	public function set_assignee_id( $user_id ) {
-		self::$mb_assignee->set_assignee( $this->post_id, $user_id );
+		update_post_meta($this->post_id, self::META_KEY_ASSIGNEE, (int)$user_id);
 		$this->assignee_id = $user_id;
 	}
 

@@ -10,6 +10,11 @@ class BuggyPress {
 	const PLUGIN_INIT_HOOK = 'buggypress_loaded';
 	const DEBUG = FALSE;
 
+
+	const MEMBERS = 'members';
+	const USERS = 'users';
+	const ALL = 'public';
+
 	/**
 	 * Get the absolute system path to the plugin directory, or a file therein
 	 * 
