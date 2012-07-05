@@ -32,7 +32,7 @@ class BuggyPress_Permissions {
 	public function filter_query_join( $join, $query ) {
 		global $wpdb;
 		if ( $this->is_post_type_query(BuggyPress_Issue::POST_TYPE, $query) && !current_user_can('read_issues') ) {
-			$join .= " LEFT JOIN {$wpdb->postmeta} bp_issue_project_meta ON {$wpdb->posts}.ID=bp_issue_project_meta.post_id AND bp_issue_project_meta.meta_key='".BuggyPress_MB_IssueProject::META_KEY_PROJECT."'";
+			$join .= " LEFT JOIN {$wpdb->postmeta} bp_issue_project_meta ON {$wpdb->posts}.ID=bp_issue_project_meta.post_id AND bp_issue_project_meta.meta_key='".BuggyPress_Issue::META_KEY_PROJECT."'";
 		}
 		return $join;
 	}
@@ -79,7 +79,7 @@ class BuggyPress_Permissions {
 			'post_type' => BuggyPress_Project::POST_TYPE,
 			'meta_query' => array(
 				array(
-					'key' => BuggyPress_MB_Permissions::META_KEY_VISIBILITY,
+					'key' => BuggyPress_Project::META_KEY_VISIBILITY,
 					'value' => is_user_logged_in()?array(BuggyPress_MB_Permissions::ALL, BuggyPress_MB_Permissions::USERS):array(BuggyPress_MB_Permissions::ALL),
 					'compare' => 'IN'
 				),
