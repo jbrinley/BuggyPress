@@ -42,6 +42,8 @@ if ( !function_exists('BuggyPress_load') ) {
 			// load the base class
 			require_once 'classes/BuggyPress.php';
 
+			BuggyPress::set_plugin_basedir();
+
 			if ( !BuggyPress::prerequisites_met(phpversion(), get_bloginfo('version')) ) {
 				// let the user know prerequisites weren't met
 				add_action('admin_head', array('BuggyPress', 'failed_to_load_notices'), 0, 0);

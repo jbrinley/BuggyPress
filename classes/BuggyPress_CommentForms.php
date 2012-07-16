@@ -4,6 +4,9 @@ class BuggyPress_CommentForms {
 	/** @var BuggyPress_CommentForms */
 	private static $instance;
 
+	/** @var BuggyPress_Issue_Changelist */
+	private $changelist = NULL;
+
 	/**
 	 * Add the issue details to the comment form
 	 *
@@ -16,16 +19,11 @@ class BuggyPress_CommentForms {
 			// the meta boxes are already rendering the exact same thing in the admin
 			// if need be in the future, the meta boxes can distinguish based on is_admin()
 			// TODO: restrict this to authorized users
-			$taxonomies = Flightless_Meta_Box::get_meta_box(BuggyPress_Issue::POST_TYPE, 'BuggyPress_MB_Taxonomies');
-			$assignee = Flightless_Meta_Box::get_meta_box(BuggyPress_Issue::POST_TYPE, 'BuggyPress_MB_Assignee');
-			ob_start();
-			$taxonomies->render($post);
-			$assignee->render($post);
-			$update_fields = ob_get_clean();
+			$form = $this->get_form();
 
 			$defaults['title_reply'] = __('Update Issue', 'buggypress');
 			$defaults['label_submit'] = __('Update', 'buggypress');
-			$defaults['comment_field'] = $update_fields.$defaults['comment_field'];
+			$defaults['comment_field'] = $form.$defaults['comment_field'];
 		}
 		return $defaults;
 	}
@@ -37,39 +35,55 @@ class BuggyPress_CommentForms {
 	 * @return void
 	 */
 	public function add_changes_to_comment( $post_id ) {
-		$post = get_post($post_id);
-		if ( !is_object($post) || $post->post_type != BuggyPress_Issue::POST_TYPE ) {
+		if ( get_post_type($post_id) != BuggyPress_Issue::POST_TYPE ) {
 			return;
 		}
-		/**
-		 * Changes should be an array of arrays, each item having three keys:
-		 *  - label - The label to use for this change
-		 *  - old - The old value
-		 *  - new - The new value
-		 */
-		$changes = apply_filters('buggpress_issue_changes', array(), $post_id);
-		if ( !$changes ) {
-			return; // nothing to do
+		$changelist = $this->build_change_list($post_id, $_POST);
+		if ( $changelist === NULL ) {
+			return; // validation error
+			// TODO: handle errors
 		}
-		$extra = '<ul class="buggy issue-updates" id="issue-update-'.time().'">'; // add timestamp to bypass WP's duplicate check
-		foreach ( $changes as $change ) {
-			$extra .= '<li>'.$this->get_change_comment($change['label'], $change['old'], $change['new']).'</li>';
-		}
-		$extra .= '</ul>';
-		$_POST['comment'] .= $extra;
+		$this->set_change_list($changelist);
+		$changelist->before_list = '<ul class="buggy issue-updates" id="issue-update-'.time().'">';
+		$_POST['comment'] .= $changelist;
+	}
+
+	private function set_change_list( BuggyPress_Issue_Changelist $changelist = NULL ) {
+		$this->changelist = $changelist;
 	}
 
 	/**
-	 * Utility function for printing change messages
-	 *
-	 * @param string $label
-	 * @param string $old_value
-	 * @param string $new_value
-	 * @return string
+	 * @return BuggyPress_Issue_Changelist|null
 	 */
-	private function get_change_comment( $label, $old_value, $new_value ) {
-		$message = sprintf(__('%s changed from <em>%s</em> to <em>%s</em>', 'buggypress'), $label, $old_value, $new_value);
-		return apply_filters('buggypress_issue_change_comment', $message, $label, $old_value, $new_value);
+	private function get_change_list() {
+		return $this->changelist;
+	}
+
+	/**
+	 * @param $post_id
+	 * @param $submitted
+	 *
+	 * @return BuggyPress_Issue_Changelist|NULL
+	 */
+	private function build_change_list( $post_id, $submitted ) {
+		$form = $this->get_form(array('post_id' => $post_id));
+		if ( !$form->isValid($submitted) ) {
+			return NULL;
+		}
+		$data = $form->getValues(TRUE);
+		// TODO: handle each field
+		$changelist = new BuggyPress_Issue_Changelist($form->get_issue());
+		$changelist->add_change('title', $data[BuggyPress_Form_Element_IssueTitle::FIELD_NAME]);
+		$changelist->add_change('description', $data[BuggyPress_Form_Element_IssueDescription::FIELD_NAME]);
+		$changelist->add_change('project', (int)$data[BuggyPress_Form_Element_IssueProject::FIELD_NAME]);
+		$changelist->add_change('assignee', (int)$data[BuggyPress_Form_Element_IssueAssignee::FIELD_NAME]);
+		$changelist->add_change('type', (int)$data[BuggyPress_Form_Element_IssueType::FIELD_NAME]);
+		$changelist->add_change('status', (int)$data[BuggyPress_Form_Element_IssueStatus::FIELD_NAME]);
+		$changelist->add_change('priority', (int)$data[BuggyPress_Form_Element_IssuePriority::FIELD_NAME]);
+		$changelist->add_change('resolution', (int)$data[BuggyPress_Form_Element_IssueResolution::FIELD_NAME]);
+
+		$changelist = apply_filters( 'buggypress_issue_changelist', $changelist, $submitted );
+		return $changelist;
 	}
 
 	/**
@@ -88,16 +102,30 @@ class BuggyPress_CommentForms {
 		if ( !is_object($comment) ) {
 			return;
 		}
-		$post = get_post($comment->comment_post_ID);
-		if ( !is_object($post) || $post->post_type != BuggyPress_Issue::POST_TYPE ) {
+		if ( get_post_type($comment->comment_post_ID) != BuggyPress_Issue::POST_TYPE ) {
 			return;
 		}
-		/** @var $taxonomies BuggyPress_MB_Taxonomies */
-		$taxonomies = Flightless_Meta_Box::get_meta_box(BuggyPress_Issue::POST_TYPE, 'BuggyPress_MB_Taxonomies');
-		/** @var $assignee BuggyPress_MB_Assignee */
-		$assignee = Flightless_Meta_Box::get_meta_box(BuggyPress_Issue::POST_TYPE, 'BuggyPress_MB_Assignee');
-		$taxonomies->save($post->ID, $post);
-		$assignee->save($post->ID, $post);
+
+		$changelist = $this->get_change_list();
+		if ( $changelist ) {
+			$changelist->commit_changes();
+		}
+	}
+
+	/**
+	 * @param array $args
+	 * @return BuggyPress_Form_IssueNew
+	 */
+	private function get_form( $args = array() ) {
+		$defaults = array(
+			'post_id' => get_the_ID(),
+		);
+		$args = wp_parse_args($args, $defaults);
+		$issue = new BuggyPress_Issue($args['post_id']);
+
+		$form = new BuggyPress_Form_IssueUpdate($issue);
+		$form = apply_filters('buggypress_update_issue_form', $form, $args);
+		return $form;
 	}
 
 	private function add_hooks() {

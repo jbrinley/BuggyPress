@@ -37,10 +37,6 @@ class BuggyPress_Issue {
 	 */
 	private static $tax_type = NULL;
 	/**
-	 * @var BuggyPress_MB_Taxonomies
-	 */
-	private static $mb_taxonomies = NULL;
-	/**
 	 * @var BuggyPress_MB_Assignee
 	 */
 	private static $mb_assignee = NULL;
@@ -105,11 +101,17 @@ class BuggyPress_Issue {
 	}
 
 	public function get_permalink() {
-		return get_permalink($this->post_id);
+		if ( $this->post_id ) {
+			return get_permalink($this->post_id);
+		}
+		return '';
 	}
 
 	public function get_title() {
-		return get_the_title($this->post_id);
+		if ( $this->post_id ) {
+			return get_the_title($this->post_id);
+		}
+		return '';
 	}
 
 	public function get_description() {
@@ -218,6 +220,8 @@ class BuggyPress_Issue {
 				return $term?$term:NULL;
 			case 'slug':
 				return $term?$term->slug:'';
+			case 'name':
+				return $term?$term->name:'';
 			case 'id':
 			default:
 				return $term?$term->term_id:0;
@@ -251,6 +255,62 @@ class BuggyPress_Issue {
 		$permitter->add_permissions('issues', 'editor');
 	}
 
+	/**
+	 * Get a list of issue types, properly sorted.
+	 *
+	 * @static
+	 * return array
+	 */
+	public static function get_types() {
+		$terms = get_terms(self::$tax_type->get_id(), array(
+			'hide_empty' => FALSE,
+		));
+		// TODO: sort
+		return $terms;
+	}
+
+	/**
+	 * Get a list of issue statuses, properly sorted.
+	 *
+	 * @static
+	 * return array
+	 */
+	public static function get_statuses() {
+		$terms = get_terms(self::$tax_status->get_id(), array(
+			'hide_empty' => FALSE,
+		));
+		// TODO: sort
+		return $terms;
+	}
+
+	/**
+	 * Get a list of issue resolutions, properly sorted.
+	 *
+	 * @static
+	 * return array
+	 */
+	public static function get_resolutions() {
+		$terms = get_terms(self::$tax_resolution->get_id(), array(
+			'hide_empty' => FALSE,
+		));
+		// TODO: sort
+		return $terms;
+	}
+
+	/**
+	 * Get a list of issue priorities, properly sorted.
+	 *
+	 * @static
+	 * return array
+	 */
+	public static function get_priorities() {
+		$terms = get_terms(self::$tax_priority->get_id(), array(
+			'hide_empty' => FALSE,
+		));
+		// TODO: sort
+		return $terms;
+	}
+
 	private static function register_taxonomies() {
 		// TODO: show in menu, but not in meta box
 
@@ -267,6 +327,8 @@ class BuggyPress_Issue {
 			'low' => array('name' => 'Low', 'description' => 'Low priority'),
 		));
 
+		new BuggyPress_TaxonomyOrder(self::$tax_priority->get_id());
+
 		self::$tax_resolution = new Flightless_Taxonomy('issue_resolution');
 		self::$tax_resolution->post_types[] = self::POST_TYPE;
 		self::$tax_resolution->set_label( __('Resolution', 'buggypress'), __('Resolutions', 'buggypress') );
@@ -280,6 +342,7 @@ class BuggyPress_Issue {
 			'duplicate' => array('name' => 'Duplicate', 'description' => 'This duplicates another issue'),
 			'cant-reproduce' => array('name' => 'Cannot Reproduce', 'description' => 'The problem cannot be reproduced'),
 		));
+		new BuggyPress_TaxonomyOrder(self::$tax_resolution->get_id());
 
 		self::$tax_status = new Flightless_Taxonomy('issue_status');
 		self::$tax_status->post_types[] = self::POST_TYPE;
@@ -293,6 +356,7 @@ class BuggyPress_Issue {
 			'closed' => array('name' => 'Closed', 'description' => 'Completed and verified'),
 			'deferred' => array('name' => 'Deferred', 'description' => 'Action may be taken in the future'),
 		));
+		new BuggyPress_TaxonomyOrder(self::$tax_status->get_id());
 
 		self::$tax_type = new Flightless_Taxonomy('issue_type');
 		self::$tax_type->post_types[] = self::POST_TYPE;
@@ -305,16 +369,11 @@ class BuggyPress_Issue {
 			'feature' => array('name' => 'Feature', 'description' => 'A new feature to add'),
 			'task' => array('name' => 'Task', 'description' => 'A general task to complete'),
 		));
+		new BuggyPress_TaxonomyOrder(self::$tax_type->get_id());
 	}
 
 	private static function register_meta_boxes() {
 		self::$mb_assignee = add_flightless_meta_box(self::POST_TYPE, 'BuggyPress_MB_Assignee');
 		self::$mb_project = add_flightless_meta_box(self::POST_TYPE, 'BuggyPress_MB_IssueProject');
-		self::$mb_taxonomies = add_flightless_meta_box(self::POST_TYPE, 'BuggyPress_MB_Taxonomies', array( 'taxonomies' => array(
-			self::$tax_type->get_id() => array( 'label' => self::$tax_type->get_label() ),
-			self::$tax_status->get_id() => array( 'label' => self::$tax_status->get_label() ),
-			self::$tax_priority->get_id() => array( 'label' => self::$tax_priority->get_label() ),
-			self::$tax_resolution->get_id() => array( 'label' => self::$tax_resolution->get_label() ),
-		)));
 	}
 }

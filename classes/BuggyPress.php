@@ -15,6 +15,8 @@ class BuggyPress {
 	const USERS = 'users';
 	const ALL = 'public';
 
+	private static $plugin_file = '';
+
 	/**
 	 * Get the absolute system path to the plugin directory, or a file therein
 	 * 
@@ -23,7 +25,7 @@ class BuggyPress {
 	 * @return string
 	 */
 	public static function plugin_path( $path ) {
-		$base = dirname(dirname(__FILE__));
+		$base = dirname(self::$plugin_file);
 		if ( $path ) {
 			return trailingslashit($base).$path;
 		} else {
@@ -38,7 +40,23 @@ class BuggyPress {
 	 * @return string
 	 */
 	public static function plugin_url( $path ) {
-		return plugins_url($path, __FILE__);
+		return plugins_url($path, self::$plugin_file);
+	}
+
+	public static function set_plugin_basedir() {
+		if ( !empty(self::$plugin_file) ) {
+			return;
+		}
+		global $plugin, $mu_plugin, $network_plugin;
+		$plugin_file = dirname(__FILE__);
+		if ( !empty($plugin) ) {
+			$plugin_file = $plugin;
+		} elseif ( !empty($mu_plugin) ) {
+			$plugin_file = $mu_plugin;
+		} elseif ( !empty($network_plugin) ) {
+			$plugin_file = $network_plugin;
+		}
+		self::$plugin_file = $plugin_file;
 	}
 
 	/**
@@ -69,6 +87,11 @@ class BuggyPress {
 	}
 
 	public static function initialize_plugin() {
+		self::set_plugin_basedir();
+		// initialize the Zend library
+		set_include_path(implode(PATH_SEPARATOR, array(get_include_path(), self::plugin_path('lib'))));
+		require_once('Zend/Loader/Autoloader.php');
+		Zend_Loader_Autoloader::getInstance();
 		spl_autoload_register(array(__CLASS__, 'autoloader'));
 		$to_init = array(
 			'BuggyPress_Issue',
@@ -81,7 +104,7 @@ class BuggyPress {
 		}
 
 		// load all the template tags
-		foreach ( glob(self::plugin_path("/template-tags/*.php")) as $filename ) {
+		foreach ( glob(self::plugin_path("template-tags/*.php")) as $filename ) {
 			include $filename;
 		}
 		do_action(self::PLUGIN_INIT_HOOK);
@@ -91,6 +114,10 @@ class BuggyPress {
 		if ( strpos($class, 'BuggyPress') === 0 ) {
 			if ( strpos($class, 'BuggyPress_MB') === 0 ) {
 				$file = self::plugin_path('classes'.DIRECTORY_SEPARATOR.'meta-boxes'.DIRECTORY_SEPARATOR.$class.'.php');
+			} elseif ( strpos($class, 'BuggyPress_Form_Element') === 0 ) {
+				$file = self::plugin_path('classes'.DIRECTORY_SEPARATOR.'forms'.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.$class.'.php');
+			} elseif ( strpos($class, 'BuggyPress_Form') === 0 ) {
+				$file = self::plugin_path('classes'.DIRECTORY_SEPARATOR.'forms'.DIRECTORY_SEPARATOR.$class.'.php');
 			} else {
 				$file = self::plugin_path('classes'.DIRECTORY_SEPARATOR.$class.'.php');
 			}

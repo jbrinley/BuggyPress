@@ -1,0 +1,12 @@
+#the-list td.bp_sort_order {
+	cursor: pointer;
+}
+#the-list td.bp_sort_order .sort-handle {
+	width: 16px;
+	height: 16px;
+	background-image: url(ui-icons.png);
+	background-position: -128px -48px;
+	display: block;
+	overflow: hidden;
+	cursor: pointer;
+}

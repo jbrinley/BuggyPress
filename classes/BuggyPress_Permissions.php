@@ -17,9 +17,9 @@ class BuggyPress_Permissions {
 	 * Register WordPress hooks
 	 */
 	private function add_hooks() {
-		add_action('init', array($this, 'register_permissions'), 10, 0);
-		add_filter('posts_where', array($this, 'filter_query_where'), 10, 2);
-		add_filter('posts_join', array($this, 'filter_query_join'), 10, 2);
+		//add_action('init', array($this, 'register_permissions'), 10, 0);
+		//add_filter('posts_where', array($this, 'filter_query_where'), 10, 2);
+		//add_filter('posts_join', array($this, 'filter_query_join'), 10, 2);
 	}
 
 	/**

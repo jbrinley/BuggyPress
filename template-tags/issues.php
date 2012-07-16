@@ -1,13 +1,20 @@
 <?php
 
+/**
+ * @return void echoes the assigned issue_type term name
+ */
 function bp_the_issue_type() {
 	$term = bp_get_the_issue_type();
 	echo apply_filters('buggypress_issue_type', $term?$term->name:'', $term);
 }
 
+/**
+ * @param int $post_id
+ * @return object|NULL The issue_type term assigned to the post
+ */
 function bp_get_the_issue_type( $post_id = 0 ) {
 	$issue = bp_get_issue($post_id);
-	$term = $issue->get_type();
+	$term = $issue->get_type('object');
 	return $term;
 }
 
