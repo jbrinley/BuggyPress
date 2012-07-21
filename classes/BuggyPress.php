@@ -96,6 +96,7 @@ class BuggyPress {
 		$to_init = array(
 			'BuggyPress_Issue',
 			'BuggyPress_Project',
+			'BuggyPress_Menus',
 			'BuggyPress_CommentForms',
 			'BuggyPress_NewIssuePage',
 		);
