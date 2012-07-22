@@ -15,7 +15,7 @@ jQuery(document).ready( function($) {
 				menu_items: to_add
 			},
 			function( response ) {
-				$('#menu-to-edit').append(response);
+				$('#menu-to-edit').append(response).hideAdvancedMenuItemFields();
 			}
 		);
 	});

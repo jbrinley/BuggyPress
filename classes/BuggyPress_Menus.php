@@ -6,6 +6,8 @@ class BuggyPress_Menus {
 
 
 	/**
+	 * Create our menu meta box
+	 *
 	 * @wordpress-action load-nav-menus.php
 	 */
 	public function create_menu_metabox() {
@@ -28,7 +30,10 @@ class BuggyPress_Menus {
 	}
 
 	/**
+	 * Ajax callback for our menu items
+	 *
 	 * @wordpress-action wp_ajax_buggypress_add_to_menu
+	 * @return void Exits the program on completion
 	 */
 	public function ajax_add_to_menu() {
 		check_ajax_referer('buggypress-menu', 'buggypress_nonce');
@@ -54,6 +59,7 @@ class BuggyPress_Menus {
 			if ( !empty( $menu_obj->ID ) ) {
 				$menu_obj = wp_setup_nav_menu_item( $menu_obj );
 				$menu_obj->label = $menu_obj->title; // don't show "(pending)" in ajax-added items
+				$menu_obj->type_label = 'BuggyPress';
 				$output_menu_items[] = $menu_obj;
 			}
 		}
@@ -74,19 +80,27 @@ class BuggyPress_Menus {
 	}
 
 	/**
-	 * @param $item
+	 * Set properties on our custom menu items
+	 *
 	 * @wordpress-filter wp_setup_nav_menu_item
+	 * @param object $item
+	 * @return object
 	 */
 	public function setup_menu_item( $item ) {
 		if ( $item->type != 'buggypress-custom' ) {
 			return $item;
 		}
 		$item->url = $this->get_menu_item_url($item->object);
+		$item->type_label = 'BuggyPress';
 		return $item;
 	}
 
 	/**
+	 * Set the "current" status on menu items
+	 *
 	 * @wordpress-filter wp_nav_menu_objects
+	 * @param array $items
+	 * @return array
 	 */
 	public function set_current_menu_item( $items ) {
 		foreach ( $items as $item ) {
@@ -120,6 +134,9 @@ class BuggyPress_Menus {
 		return $items;
 	}
 
+	/**
+	 * Print the HTML for the buggypress menu metabox
+	 */
 	public function populate_menu_metabox() {
 		global $nav_menu_selected_id;
 		$projects = get_post_type_object('project');
@@ -130,13 +147,44 @@ class BuggyPress_Menus {
 		include(BuggyPress::plugin_path('views/menu-meta-box.php'));
 	}
 
+	/**
+	 * If the projects menu item is in the menu, add all
+	 * projects as its children
+	 *
+	 * @wordpress-filter wp_get_nav_menu_items
+	 *
+	 * @param array $items
+	 * @param string $menu
+	 * @param array $args
+	 *
+	 * @return array
+	 */
+	public function add_project_submenu( $items, $menu, $args ) {
+		foreach ( $items as $item ) {
+			if ( $item->type == 'buggypress-custom' && $item->object == 'project' ) {
+				$projects = $this->get_project_menu_items($item);
+				if ( $projects ) {
+					$items = array_merge($items, $projects);
+				}
+			}
+		}
+		return $items;
+	}
+
 	private function add_hooks() {
 		add_action( 'load-nav-menus.php', array( $this, 'create_menu_metabox' ), 10, 0 );
 		add_action( 'wp_ajax_buggypress_add_to_menu', array( $this, 'ajax_add_to_menu' ), 10, 0 );
 		add_filter( 'wp_setup_nav_menu_item', array( $this, 'setup_menu_item' ), 10, 1 );
 		add_filter( 'wp_nav_menu_objects', array( $this, 'set_current_menu_item' ), 10, 1 );
+		add_filter( 'wp_get_nav_menu_items', array( $this, 'add_project_submenu' ), 10, 3 );
 	}
 
+	/**
+	 * Add a buggypress menu item
+	 *
+	 * @param string $item_slug
+	 * @return int The new menu item ID
+	 */
 	private function add_menu_item( $item_slug ) {
 		switch ( $item_slug ) {
 			case 'project':
@@ -157,6 +205,12 @@ class BuggyPress_Menus {
 		return wp_update_nav_menu_item( 0, 0, $data );
 	}
 
+	/**
+	 * Get the URL for a dynamic menu item
+	 *
+	 * @param string $item_slug
+	 * @return string
+	 */
 	private function get_menu_item_url( $item_slug ) {
 		switch ( $item_slug ) {
 			case 'project':
@@ -173,6 +227,29 @@ class BuggyPress_Menus {
 			// TODO: set to TRUE if on an issue?
 		}
 		return FALSE;
+	}
+
+	/**
+	 * Get menu items for all projects
+	 *
+	 * @param object $parent The parent menu item
+	 * @return array Post objects converted to menu items, sorted alphabetically
+	 */
+	private function get_project_menu_items( $parent ) {
+		// TODO: figure out how to cache this while taking into account access rules
+		$projects = get_posts(array(
+			'post_type' => BuggyPress_Project::POST_TYPE,
+			'post_status' => 'publish',
+			'posts_per_page' => -1,
+			'orderby' => 'title',
+			'order' => 'ASC',
+		));
+		$projects = array_map('wp_setup_nav_menu_item', $projects);
+		foreach ( $projects as $key => $project ) {
+			$project->menu_item_parent = $parent->ID;
+			$project->menu_order = $parent->menu_order.'.'.$key;
+		}
+		return $projects;
 	}
 
 	/********** Singleton *************/
