@@ -254,7 +254,9 @@ class BuggyPress_Menus {
 			}
 			// TODO: set to TRUE if on an issue?
 		} elseif ( $item->object == 'newissue' ) {
-
+			if ( get_query_var('WP_Route') == 'buggypress_new_issue' ) {
+				return TRUE;
+			}
 		}
 		return FALSE;
 	}
