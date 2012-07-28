@@ -8,20 +8,10 @@ class BuggyPress_NewIssuePage {
 	 * @param WP_Router $router
 	 */
 	public function register_page( $router ) {
-		global $wp_rewrite;
 		$issue_post_type = get_post_type_object( 'issue' );
 
-		if ( get_option( 'permalink_structure' ) && is_array( $issue_post_type->rewrite ) ) {
-			$path = ( TRUE === $issue_post_type->has_archive ) ? $issue_post_type->rewrite['slug'] : $issue_post_type->has_archive;
-			if ( $issue_post_type->rewrite['with_front'] ) {
-				$path = $wp_rewrite->front . $path;
-			} else {
-				$path = $wp_rewrite->root . $path;
-			}
-		} else {
-			$path = 'issues';
-		}
-		$path = trailingslashit($path)._x('new', 'new post path', 'buggypress');
+		$path = self::get_path();
+
 		$router->add_route('buggypress_new_issue', array(
 			'path' => '((.+?)/)?'.$path.'/?$',
 			'query_vars' => array(
@@ -121,6 +111,29 @@ class BuggyPress_NewIssuePage {
 
 	private function add_hooks() {
 		add_action( 'wp_router_generate_routes', array( $this, 'register_page' ), 10, 1 );
+	}
+
+	public static function get_path( $project = '' ) {
+		global $wp_rewrite;
+		$issue_post_type = get_post_type_object( 'issue' );
+
+		if ( get_option( 'permalink_structure' ) && is_array( $issue_post_type->rewrite ) ) {
+			$path = ( TRUE === $issue_post_type->has_archive ) ? $issue_post_type->rewrite['slug'] : $issue_post_type->has_archive;
+			if ( $issue_post_type->rewrite['with_front'] ) {
+				$path = $wp_rewrite->front . $path;
+			} else {
+				$path = $wp_rewrite->root . $path;
+			}
+		} else {
+			$path = 'issues';
+		}
+		$path = trailingslashit($path)._x('new', 'new post path', 'buggypress');
+
+		if ( $project ) {
+			$path = $project.'/'.$path;
+		}
+
+		return $path;
 	}
 
 	/********** Singleton *************/

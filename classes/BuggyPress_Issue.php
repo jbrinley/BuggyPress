@@ -180,6 +180,9 @@ class BuggyPress_Issue {
 		$this->assignee_id = $user_id;
 	}
 
+	/**
+	 * @return int The ID of the project to which this issue is assigned
+	 */
 	public function get_project_id() {
 		if ( is_null($this->project_id) ) {
 			$this->project_id = (int)get_post_meta($this->post_id, self::META_KEY_PROJECT, TRUE);

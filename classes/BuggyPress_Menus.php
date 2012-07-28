@@ -140,8 +140,11 @@ class BuggyPress_Menus {
 	public function populate_menu_metabox() {
 		global $nav_menu_selected_id;
 		$projects = get_post_type_object('project');
+		$issues = get_post_type_object( 'issue' );
+
 		$items = array(
 			'project' => $projects->label,
+			'newissue' => $issues->labels->new_item,
 		);
 
 		include(BuggyPress::plugin_path('views/menu-meta-box.php'));
@@ -172,11 +175,14 @@ class BuggyPress_Menus {
 	}
 
 	private function add_hooks() {
-		add_action( 'load-nav-menus.php', array( $this, 'create_menu_metabox' ), 10, 0 );
-		add_action( 'wp_ajax_buggypress_add_to_menu', array( $this, 'ajax_add_to_menu' ), 10, 0 );
 		add_filter( 'wp_setup_nav_menu_item', array( $this, 'setup_menu_item' ), 10, 1 );
-		add_filter( 'wp_nav_menu_objects', array( $this, 'set_current_menu_item' ), 10, 1 );
-		add_filter( 'wp_get_nav_menu_items', array( $this, 'add_project_submenu' ), 10, 3 );
+		if ( is_admin() ) {
+			add_action( 'load-nav-menus.php', array( $this, 'create_menu_metabox' ), 10, 0 );
+			add_action( 'wp_ajax_buggypress_add_to_menu', array( $this, 'ajax_add_to_menu' ), 10, 0 );
+		} else {
+			add_filter( 'wp_nav_menu_objects', array( $this, 'set_current_menu_item' ), 10, 1 );
+			add_filter( 'wp_get_nav_menu_items', array( $this, 'add_project_submenu' ), 10, 3 );
+		}
 	}
 
 	/**
@@ -193,7 +199,15 @@ class BuggyPress_Menus {
 					'menu-item-title' => $pto->label,
 					'menu-item-type' => 'buggypress-custom',
 					'menu-item-object' => 'project',
-					'menu-item-url' => get_post_type_archive_link('project'),
+					'menu-item-url' => $this->get_menu_item_url('project'),
+				);
+				break;
+			case 'newissue':
+				$data = array(
+					'menu-item-title' => 'New Issue',
+					'menu-item-type' => 'buggypress-custom',
+					'menu-item-object' => 'newissue',
+					'menu-item-url' => $this->get_menu_item_url('newissue'),
 				);
 				break;
 			default:
@@ -215,6 +229,20 @@ class BuggyPress_Menus {
 		switch ( $item_slug ) {
 			case 'project':
 				return get_post_type_archive_link('project');
+			case 'newissue':
+				$project = '';
+				if ( !is_admin() ) {
+					global $wp_query;
+					if ( is_singular('issue') ) {
+						$issue = new BuggyPress_Issue(get_queried_object_id());
+						$project_id = $issue->get_project_id();
+						$project_post = get_post($project_id);
+						$project = $project_post->post_name;
+					} elseif ( $project_query_var = get_query_var('project') ) {
+						$project = $project_query_var;
+					}
+				}
+				return home_url(BuggyPress_NewIssuePage::get_path($project));
 		}
 		return '';
 	}
@@ -225,6 +253,8 @@ class BuggyPress_Menus {
 				return TRUE;
 			}
 			// TODO: set to TRUE if on an issue?
+		} elseif ( $item->object == 'newissue' ) {
+
 		}
 		return FALSE;
 	}
