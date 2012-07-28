@@ -99,6 +99,7 @@ class BuggyPress {
 			'BuggyPress_Menus',
 			'BuggyPress_CommentForms',
 			'BuggyPress_NewIssuePage',
+			'BuggyPress_IssueQueryPage',
 		);
 		foreach ( $to_init as $pt ) {
 			add_action(self::PLUGIN_INIT_HOOK, array($pt, 'init'));
