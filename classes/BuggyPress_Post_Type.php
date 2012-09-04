@@ -9,12 +9,16 @@ class BuggyPress_Post_Type extends Flightless_Post_Type {
 
 	public function select_post_template( $template ) {
 		if ( is_single() && get_query_var('post_type') == $this->post_type ) {
-			// check in the theme's loyalty directory
+			// check in the theme's buggypress directory
 			if ( $found = locate_template(array('buggypress/'.$this->post_type.'.php'), FALSE) ) {
 				return $found;
 			}
-			if ( file_exists(BuggyPress::plugin_path('post-templates/'.$this->post_type.'.php')) ) {
-				return BuggyPress::plugin_path('post-templates/'.$this->post_type.'.php');
+			// check in the main theme directory
+			if ( $found = locate_template(array('single-'.$this->post_type.'.php'), FALSE) ) {
+				return $found;
+			}
+			if ( file_exists(BuggyPress::plugin_path('views/page-templates/single-'.$this->post_type.'.php')) ) {
+				return BuggyPress::plugin_path('views/page-templates/single-'.$this->post_type.'.php');
 			}
 		}
 		return $template;

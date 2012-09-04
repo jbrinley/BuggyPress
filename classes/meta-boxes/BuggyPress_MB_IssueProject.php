@@ -18,7 +18,7 @@ class BuggyPress_MB_IssueProject extends Flightless_Meta_Box {
 			'order' => 'ASC',
 		));
 		$current_project = $issue->get_project_id();
-		include(BuggyPress::plugin_path('views'.DIRECTORY_SEPARATOR.'meta-box-issue-project.php'));
+		include(BuggyPress::plugin_path('views/admin/meta-box-issue-project.php'));
 	}
 
 	public function save( $post_id, $post ) {

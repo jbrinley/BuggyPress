@@ -16,7 +16,7 @@ class BuggyPress_MB_Members extends Flightless_Meta_Box {
 		$users = get_users();
 		$members = $this->get_members($post->ID);
 		$admins = $this->get_administrators($post->ID);
-		include(BuggyPress::plugin_path('views'.DIRECTORY_SEPARATOR.'meta-box-members.php'));
+		include(BuggyPress::plugin_path('views/admin/meta-box-members.php'));
 	}
 
 	public function save( $post_id, $post ) {

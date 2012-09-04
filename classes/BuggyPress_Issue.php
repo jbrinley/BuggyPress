@@ -8,13 +8,13 @@ class BuggyPress_Issue {
 	const META_KEY_MEMBERS = '_buggypress_project_member';
 	const META_KEY_ADMINS = '_buggypress_project_admin';
 
-	private $post_id = NULL;
-	private $assignee_id = NULL;
-	private $project_id = NULL;
-	private $status = NULL;
-	private $priority = NULL;
-	private $resolution = NULL;
-	private $type = NULL;
+	protected $post_id = NULL;
+	protected $assignee_id = NULL;
+	protected $project_id = NULL;
+	protected $status = NULL;
+	protected $priority = NULL;
+	protected $resolution = NULL;
+	protected $type = NULL;
 
 	/**
 	 * @var BuggyPress_Post_Type
@@ -23,19 +23,19 @@ class BuggyPress_Issue {
 	/**
 	 * @var Flightless_Taxonomy
 	 */
-	private static $tax_priority = NULL;
+	protected static $tax_priority = NULL;
 	/**
 	 * @var Flightless_Taxonomy
 	 */
-	private static $tax_resolution = NULL;
+	protected static $tax_resolution = NULL;
 	/**
 	 * @var Flightless_Taxonomy
 	 */
-	private static $tax_status = NULL;
+	protected static $tax_status = NULL;
 	/**
 	 * @var Flightless_Taxonomy
 	 */
-	private static $tax_type = NULL;
+	protected static $tax_type = NULL;
 	/**
 	 * @var BuggyPress_MB_Assignee
 	 */
@@ -205,8 +205,29 @@ class BuggyPress_Issue {
 	}
 
 	public function set_assigned_term( $term_id, $taxonomy ) {
+		if ( !$term_id ) {
+			$term_id = array();
+		}
+		$term_id = $this->normalize_terms_to_set($term_id);
 		wp_set_object_terms( $this->post_id, $term_id, $taxonomy );
 		$this->flush();
+	}
+
+	/**
+	 * @param array|int|string $terms
+	 * @return int
+	 */
+	private function normalize_terms_to_set( $terms ) {
+		if ( is_array($terms) ) {
+			foreach ( $terms as &$term ) {
+				$term = $this->normalize_terms_to_set($term);
+			}
+		} else {
+			if ( is_numeric($terms) ) {
+				$terms = (int)$terms;
+			}
+		}
+		return $terms;
 	}
 
 	/**
@@ -217,7 +238,15 @@ class BuggyPress_Issue {
 	 *
 	 * @return int|null|string
 	 */
-	private function format_term( $term, $format = 'id' ) {
+	protected function format_term( $term, $format = 'id' ) {
+		if ( is_array($term) ) {
+			$output = array();
+			foreach ( $term as $single_term ) {
+				$output[] = $this->format_term($single_term, $format);
+			}
+			return $output;
+		}
+		// just looking for a single term
 		switch ( $format ) {
 			case 'object':
 				return $term?$term:NULL;

@@ -13,7 +13,7 @@ class BuggyPress_MB_Assignee extends Flightless_Meta_Box {
 		$issue = new BuggyPress_Issue($post->ID);
 		$users = get_users();
 		$assignee = $issue->get_assignee_id();
-		include(BuggyPress::plugin_path('views'.DIRECTORY_SEPARATOR.'meta-box-assignee.php'));
+		include(BuggyPress::plugin_path('views/admin/meta-box-assignee.php'));
 	}
 
 	public function save( $post_id, $post ) {

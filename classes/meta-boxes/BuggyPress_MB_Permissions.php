@@ -20,7 +20,7 @@ class BuggyPress_MB_Permissions extends Flightless_Meta_Box {
 	public function render( $post ) {
 		$visibility = $this->get_visibility($post->ID);
 		$commenting = $this->get_commenting($post->ID);
-		include(BuggyPress::plugin_path('views'.DIRECTORY_SEPARATOR.'meta-box-permissions.php'));
+		include(BuggyPress::plugin_path('views/admin/meta-box-permissions.php'));
 	}
 
 	public function save( $post_id, $post ) {

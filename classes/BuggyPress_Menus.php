@@ -104,7 +104,7 @@ class BuggyPress_Menus {
 	 */
 	public function set_current_menu_item( $items ) {
 		foreach ( $items as $item ) {
-			if ( 'buggypress-custom' == $item->type && $this->is_current_menu_item($item) ) {
+			if ( $this->is_current_menu_item($item) ) {
 				// set the item as current
 				$item->current = TRUE;
 				$item->classes[] = 'current-menu-item';
@@ -147,7 +147,7 @@ class BuggyPress_Menus {
 			'newissue' => $issues->labels->new_item,
 		);
 
-		include(BuggyPress::plugin_path('views/menu-meta-box.php'));
+		include(BuggyPress::plugin_path('views/admin/menu-meta-box.php'));
 	}
 
 	/**
@@ -248,13 +248,19 @@ class BuggyPress_Menus {
 	}
 
 	private function is_current_menu_item( $item ) {
-		if ( $item->object == 'project' ) {
-			if ( is_post_type_archive('project') || is_singular('project') ) {
-				return TRUE;
+		if ( 'buggypress-custom' == $item->type ) {
+			if ( $item->object == 'project' ) {
+				if ( is_post_type_archive('project') || is_singular('project') ) {
+					return TRUE;
+				}
+				// TODO: set to TRUE if on an issue?
+			} elseif ( $item->object == 'newissue' ) {
+				if ( get_query_var('WP_Route') == 'buggypress_new_issue' ) {
+					return TRUE;
+				}
 			}
-			// TODO: set to TRUE if on an issue?
-		} elseif ( $item->object == 'newissue' ) {
-			if ( get_query_var('WP_Route') == 'buggypress_new_issue' ) {
+		} elseif ( $item->type == 'post_type' ) {
+			if ( $item->object == 'project' && $item->post_name == get_query_var('issue_project') ) {
 				return TRUE;
 			}
 		}
