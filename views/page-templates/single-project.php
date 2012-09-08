@@ -29,51 +29,10 @@ get_header(); ?>
 						</header><!-- .entry-header -->
 
 						<div class="entry-content">
-							<?php the_content(); ?>
-							<?php wp_link_pages( array( 'before' => '<div class="page-link"><span>' . __( 'Pages:', 'twentyeleven' ) . '</span>', 'after' => '</div>' ) ); ?>
-							<?php
-								// TODO: something different (and better)
-								// TODO: paging
-								$issues = new WP_Query(array(
-									'post_type' => BuggyPress_Issue::POST_TYPE,
-									'posts_per_page' => -1,
-									'tax_query' => array(
-										array(
-											'taxonomy' => 'issue_status',
-											'field' => 'slug',
-											'terms' => array('open'),
-											'operator' => 'IN',
-										),
-									),
-									'meta_query' => array(
-										array(
-											'key' => BuggyPress_Issue::META_KEY_PROJECT,
-											'value' => get_the_ID(),
-										),
-									),
-								));
-							?>
-							<div class="bp-issues">
-								<?php if ( $issues->have_posts() ): ?>
-									<h3><?php _e('Open Issues'); ?></h3>
-									<ul>
-										<?php while ( $issues->have_posts() ): ?>
-											<?php $issues->the_post(); ?>
-											<li>
-												<h4><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
-												<p>
-													<?php _e('Priority'); ?>: <?php bp_the_issue_priority(); ?>
-													&bull;
-													<?php _e('Assigned to'); ?>: <?php bp_the_issue_assignee(); ?>
-												</p>
-											</li>
-										<?php endwhile; ?>
-									</ul>
-									<?php rewind_posts(); the_post(); ?>
-								<?php else: ?>
-									<h3><?php _e('No Open Issues'); ?></h3>
-								<?php endif; ?>
-							</div>
+							<?php if ( !dynamic_sidebar('buggypress-project-'.get_the_ID()) ): ?>
+								<?php the_content(); ?>
+								<?php wp_link_pages( array( 'before' => '<div class="page-link"><span>' . __( 'Pages:', 'twentyeleven' ) . '</span>', 'after' => '</div>' ) ); ?>
+							<?php endif; ?>
 						</div><!-- .entry-content -->
 
 						<footer class="entry-meta">

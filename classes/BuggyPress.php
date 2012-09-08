@@ -101,6 +101,7 @@ class BuggyPress {
 			'BuggyPress_NewIssuePage',
 			'BuggyPress_Filter',
 			'BuggyPress_IssueFilterPage',
+			'BuggyPress_ProjectDashboard',
 		);
 		foreach ( $to_init as $pt ) {
 			add_action(self::PLUGIN_INIT_HOOK, array($pt, 'init'));
@@ -121,6 +122,8 @@ class BuggyPress {
 				$file = self::plugin_path('classes'.DIRECTORY_SEPARATOR.'forms'.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.$class.'.php');
 			} elseif ( strpos($class, 'BuggyPress_Form') === 0 ) {
 				$file = self::plugin_path('classes'.DIRECTORY_SEPARATOR.'forms'.DIRECTORY_SEPARATOR.$class.'.php');
+			} elseif ( strpos($class, 'BuggyPress_Widget') === 0 ) {
+				$file = self::plugin_path('classes'.DIRECTORY_SEPARATOR.'widgets'.DIRECTORY_SEPARATOR.$class.'.php');
 			} else {
 				$file = self::plugin_path('classes'.DIRECTORY_SEPARATOR.$class.'.php');
 			}

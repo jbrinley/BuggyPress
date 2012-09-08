@@ -253,6 +253,9 @@ class BuggyPress_Menus {
 				if ( is_post_type_archive('project') || is_singular('project') ) {
 					return TRUE;
 				}
+				if ( get_query_var('issue_project') ) {
+					return TRUE;
+				}
 				// TODO: set to TRUE if on an issue?
 			} elseif ( $item->object == 'newissue' ) {
 				if ( get_query_var('WP_Route') == 'buggypress_new_issue' ) {
