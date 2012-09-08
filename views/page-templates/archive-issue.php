@@ -24,19 +24,29 @@ get_header(); ?>
 
 
 		<?php if ( have_posts() ) : ?>
-
-		<?php /* Start the Loop */ ?>
-		<?php while ( have_posts() ) : the_post(); ?>
-
-			<?php
-			/* Include the Post-Format-specific template for the content.
-									 * If you want to overload this in a child theme then include a file
-									 * called content-___.php (where ___ is the Post Format name) and that will be used instead.
-									 */
-			get_template_part( 'content', get_post_format() );
-			?>
-
-			<?php endwhile; ?>
+		<div class="entry-content">
+			<table class="buggypress-table issue-table">
+				<thead>
+					<tr>
+						<th><?php _e('ID', 'buggypress'); ?></th>
+						<th><?php _e('Title', 'buggypress'); ?></th>
+						<th><?php _e('Priority', 'buggypress'); ?></th>
+						<th><?php _e('Status', 'buggypress'); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php /* Start the Loop */ ?>
+					<?php while ( have_posts() ) : the_post(); ?>
+						<tr>
+							<td><?php the_ID(); ?></td>
+							<td><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></td>
+							<td><?php bp_the_issue_priority(); ?></td>
+							<td><?php bp_the_issue_status(); ?></td>
+						</tr>
+					<?php endwhile; ?>
+				</tbody>
+			</table>
+		</div>
 
 		<?php twentyeleven_content_nav( 'nav-below' ); ?>
 
