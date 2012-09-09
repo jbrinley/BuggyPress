@@ -278,7 +278,7 @@ class BuggyPress_Issue {
 		self::register_taxonomies();
 		self::register_meta_boxes();
 
-		self::$cpt->capability_type = 'issues';
+		self::$cpt->capability_type = 'issue';
 		self::$cpt->capabilities = array(
 			'read' => 'read_issues',
 		);

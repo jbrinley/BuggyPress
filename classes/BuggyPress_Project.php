@@ -113,7 +113,7 @@ class BuggyPress_Project {
 		self::register_taxonomies();
 		self::register_meta_boxes();
 
-		self::$cpt->capability_type = 'projects';
+		self::$cpt->capability_type = 'project';
 		self::$cpt->capabilities = array(
 			'read' => 'read_projects',
 		);

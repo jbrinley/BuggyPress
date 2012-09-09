@@ -91,6 +91,8 @@ class BuggyPress {
 		// initialize the Zend library
 		set_include_path(implode(PATH_SEPARATOR, array(get_include_path(), self::plugin_path('lib'))));
 		require_once('Zend/Loader/Autoloader.php');
+		require_once('wp-router/wp-router.php');
+		require_once('flightless-wp-library/flightless-wp-library.php');
 		Zend_Loader_Autoloader::getInstance();
 		spl_autoload_register(array(__CLASS__, 'autoloader'));
 		$to_init = array(
