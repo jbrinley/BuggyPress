@@ -1,0 +1,3 @@
+[submodule "lib/wp-router"]
+	path = lib/wp-router
+	url = https://github.com/jbrinley/WP-Router.git
