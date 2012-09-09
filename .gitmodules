@@ -1,3 +1,6 @@
 [submodule "lib/wp-router"]
 	path = lib/wp-router
 	url = https://github.com/jbrinley/WP-Router.git
+[submodule "lib/flightless-wp-library"]
+	path = lib/flightless-wp-library
+	url = https://github.com/flightless/flightless-wp-library.git
