@@ -63,6 +63,9 @@ function bp_get_the_issue_assignee( $post_id = 0 ) {
 function bp_get_the_project( $post_id = 0 ) {
 	$issue = bp_get_issue($post_id);
 	$project_id = $issue->get_project_id();
+	if ( !$project = get_post($project_id) ) {
+		return 0;
+	}
 	return $project_id;
 }
 
