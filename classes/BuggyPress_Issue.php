@@ -279,6 +279,7 @@ class BuggyPress_Issue {
 		self::register_meta_boxes();
 
 		self::$cpt->capability_type = 'issue';
+		self::$cpt->map_meta_cap = TRUE;
 		self::$cpt->capabilities = array(
 			'read' => 'read_issues',
 		);

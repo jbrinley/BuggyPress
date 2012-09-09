@@ -6,7 +6,7 @@ class BuggyPress_Permissions {
 
 	private $permissions_to_register = array();
 
-	public function add_permissions( $capability_type, $role, $caps = array('read', 'read_private', 'edit', 'edit_others', 'publish') ) {
+	public function add_permissions( $capability_type, $role, $caps = array('read', 'read_private', 'edit', 'edit_others', 'publish', 'edit_published', 'delete_published') ) {
 		foreach ( $caps as $base ) {
 			$permission = $base.'_'.$capability_type;
 			$this->permissions_to_register[$role][] = $permission;

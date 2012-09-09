@@ -114,6 +114,7 @@ class BuggyPress_Project {
 		self::register_meta_boxes();
 
 		self::$cpt->capability_type = 'project';
+		self::$cpt->map_meta_cap = TRUE;
 		self::$cpt->capabilities = array(
 			'read' => 'read_projects',
 		);
