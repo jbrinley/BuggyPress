@@ -14,10 +14,28 @@ class BuggyPress_Permissions {
 	}
 
 	/**
+	 * Prevent access to issue comment form for unregistered users
+	 *
+	 * @param bool $open
+	 * @param int $post_id
+	 * @return bool
+	 */
+	public function protect_comment_form( $open, $post_id ) {
+		$post_id = $post_id?$post_id:get_the_ID();
+		if ( $post_id && get_post_type($post_id) == BuggyPress_Issue::POST_TYPE ) {
+			if ( !is_user_logged_in() ) {
+				return FALSE;
+			}
+		}
+		return $open;
+	}
+
+	/**
 	 * Register WordPress hooks
 	 */
 	private function add_hooks() {
-		add_action('init', array($this, 'register_permissions'), 10, 0);
+		add_action( 'init', array($this, 'register_permissions'), 10, 0 );
+		add_action( 'comments_open', array( $this, 'protect_comment_form' ), 10, 2 );
 		//add_filter('posts_where', array($this, 'filter_query_where'), 10, 2);
 		//add_filter('posts_join', array($this, 'filter_query_join'), 10, 2);
 	}
